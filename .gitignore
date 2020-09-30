@@ -1,0 +1,4 @@
+./archive
+*.xlsx
+*.pdf
+.csv
