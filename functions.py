@@ -9,6 +9,22 @@ def contains_series(row):
     return PC.DETECT_SERIES_SET.issubset(set(row))
 
 
+def get_series_name(row):
+    name = ""
+
+    if "#" in row[0]:
+        name = row[0].replace('#', '') + " " + row[1]
+    elif "#" in row[1]:
+        name = row[0] + " " + row[2]
+
+    return " ".join(name.split())  # remove multiple spaces
+
+
+# removes #
+def normalize_name(string):
+    return string.replace('#', '')
+
+
 # if length of row is 1 and the 0th item is not empty string then it contains group name
 def contains_group(row):
     contains = False
@@ -56,15 +72,11 @@ def num_blanks(row):
 def is_valid_row(row):
     row_set = set(row)
     is_valid = False
-    if len(row)-num_blanks(row) in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(row_set) and PC.EMPTY_LINE_FLAGS.isdisjoint(
+    if len(row) - num_blanks(row) in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(
+            row_set) and PC.EMPTY_LINE_FLAGS.isdisjoint(
             row_set):
         is_valid = True
     return is_valid
-
-
-# removes #
-def normalize_name(string):
-    return string.replace('#', '')
 
 
 # def detectSubGroup(row):

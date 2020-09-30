@@ -10,7 +10,7 @@ import PCONST as PC  # contains pdf constants
 
 # do refactor to make a row a custom object with all the methods
 
-infilename = 'test1.pdf'
+infilename = 'test3.pdf'
 outfilename = 'output.xlsx'
 midfilename = 'out.csv'
 
@@ -38,7 +38,7 @@ tabula.convert_into(infilename, midfilename, output_format='csv', pages='all', s
 
 # read the csv file call it csvfile
 with open(midfilename, newline='') as csvfile:
-    readerObject = csv.reader(csvfile, delimiter=',', quotechar='|')  # returns reader object that is an iterator
+    readerObject = csv.reader(csvfile, dialect='excel')  # returns reader object that is an iterator
     listOfRows = list(readerObject)
 
     series_name = ""
@@ -51,7 +51,7 @@ with open(midfilename, newline='') as csvfile:
         row_obj = listOfRows[r]  # row_obj is a of class list
 
         if f.contains_series(row_obj):
-            series_name = f.normalize_name(row_obj[0])
+            series_name = f.get_series_name(row_obj)
 
         if f.contains_group(row_obj):
             group_name = row_obj[0]
@@ -68,7 +68,7 @@ with open(midfilename, newline='') as csvfile:
             item_size = "".join(row_obj[ITEM_SIZE_INDEX].split()[0:3])
 
 
-
+        print(len(row_obj), row_obj)
 
         if f.is_valid_row(row_obj):
             currow += 1  # go to the next row of the outfile to process
@@ -78,7 +78,7 @@ with open(midfilename, newline='') as csvfile:
             sheet.cell(row=currow, column=4, value=series_name + " " + group_name + " " + subgroup_name)
             sheet.cell(row=currow, column=6, value=vendor_code)
             sheet.cell(row=currow, column=11, value=item_size)
-            print(row_obj)
+
 
 
 
