@@ -11,38 +11,47 @@ def contains_series(row):
 
 def get_series_name(row):
     name = ""
-
     if "#" in row[0]:
         name = row[0].replace('#', '') + " " + row[1]
     elif "#" in row[1]:
         name = row[0] + " " + row[2]
-
     return " ".join(name.split())  # remove multiple spaces
 
 
-# removes #
-def normalize_name(string):
-    return string.replace('#', '')
+def get_item_color(row):
+    color = row[3]
+    return color
+
+
+def get_units_per_carton(row):
+    upc = row[4]
+    return upc
+
+
+def get_units_of_measure(row):
+    uom = row[5]
+    return uom
+
+
+def get_unit_price(row):
+    up = row[6]
+    return up
 
 
 # if length of row is 1 and the 0th item is not empty string then it contains group name
 def contains_group(row):
     contains = False
-
     if num_blanks(row) == len(row) - 1 and not cell_is_blank(row[0]):
         contains = True
-
     return contains
 
 
 # subgroup is like "BULLNOSE"
 def contains_subgroup(row):
     contains = False
-
     # if row has 7 columns and at least 5 of them are not blank (for now)
     if len(row) == max(PC.ITEM_ROW_LEN) and len(row) - num_blanks(row) in PC.ITEM_ROW_LEN:
         contains = True
-
     return contains
 
 
@@ -51,7 +60,6 @@ def contains_vendor_code(row):
     # if row has 7 columns and at least 6 of them are not blank (for now)
     if len(row) == max(PC.ITEM_ROW_LEN) and len(row) - num_blanks(row) == 6:
         contains = True
-
     return contains
 
 
@@ -74,7 +82,7 @@ def is_valid_row(row):
     is_valid = False
     if len(row) - num_blanks(row) in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(
             row_set) and PC.EMPTY_LINE_FLAGS.isdisjoint(
-            row_set):
+        row_set):
         is_valid = True
     return is_valid
 

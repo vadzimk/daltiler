@@ -10,7 +10,7 @@ import PCONST as PC  # contains pdf constants
 
 # do refactor to make a row a custom object with all the methods
 
-infilename = 'test3.pdf'
+infilename = 'test4.pdf'
 outfilename = 'output.xlsx'
 midfilename = 'out.csv'
 
@@ -46,6 +46,10 @@ with open(midfilename, newline='') as csvfile:
     subgroup_name = ""
     vendor_code = ""
     item_size = ""
+    item_color = ""
+    item_units_per_carton = ""
+    units_of_measure = ""
+    unit_price = ""
 
     for r in range(len(listOfRows)):
         row_obj = listOfRows[r]  # row_obj is a of class list
@@ -67,7 +71,6 @@ with open(midfilename, newline='') as csvfile:
 
             item_size = "".join(row_obj[ITEM_SIZE_INDEX].split()[0:3])
 
-
         print(len(row_obj), row_obj)
 
         if f.is_valid_row(row_obj):
@@ -78,7 +81,10 @@ with open(midfilename, newline='') as csvfile:
             sheet.cell(row=currow, column=4, value=series_name + " " + group_name + " " + subgroup_name)
             sheet.cell(row=currow, column=6, value=vendor_code)
             sheet.cell(row=currow, column=11, value=item_size)
-
+            sheet.cell(row=currow, column=10, value=f.get_item_color(row_obj))
+            sheet.cell(row=currow, column=9, value=f.get_units_per_carton(row_obj))
+            sheet.cell(row=currow, column=7, value=f.get_units_of_measure(row_obj))  # compound field
+            sheet.cell(row=currow, column=27, value=f.get_unit_price(row_obj))
 
 
 
