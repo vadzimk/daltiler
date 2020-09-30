@@ -3,5 +3,11 @@ archive/
 *.pdf
 .csv
 .idea
-__pycache__
 
+
+*.log
+*.pot
+*.pyc
+*/*/*/__pycache__/
+*/*/__pycache__/
+*/__pycache__/
