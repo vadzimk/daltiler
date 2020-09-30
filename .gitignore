@@ -1,4 +1,7 @@
-./archive
+archive/
 *.xlsx
 *.pdf
 .csv
+.idea
+__pycache__
+
