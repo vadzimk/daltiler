@@ -30,6 +30,15 @@ def contains_subgroup(row):
     return contains
 
 
+def contains_vendor_code(row):
+    contains = False
+    # if row has 7 columns and at least 6 of them are not blank (for now)
+    if len(row) == max(PC.ITEM_ROW_LEN) and len(row) - num_blanks(row) == 6:
+        contains = True
+
+    return contains
+
+
 def cell_is_blank(cell):
     return cell == '\"\"' or not cell
 
@@ -47,7 +56,7 @@ def num_blanks(row):
 def is_valid_row(row):
     row_set = set(row)
     is_valid = False
-    if len(row) in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(row_set) and PC.EMPTY_LINE_FLAGS.isdisjoint(
+    if len(row)-num_blanks(row) in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(row_set) and PC.EMPTY_LINE_FLAGS.isdisjoint(
             row_set):
         is_valid = True
     return is_valid

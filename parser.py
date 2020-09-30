@@ -27,8 +27,6 @@ sheet = wb.active  # get active sheet of the workbook
 for i in range(len(TEMPLATE.HEADER)):
     sheet.cell(row=currow, column=i + 1, value=TEMPLATE.HEADER[i])
 
-
-
 # read pdf into data frame
 # df = tabula.read_pdf('test5.pdf', stream=True, pages='all')
 # print(df)
@@ -46,10 +44,11 @@ with open(midfilename, newline='') as csvfile:
     series_name = ""
     group_name = ""
     subgroup_name = ""
+    vendor_code = ""
+    item_size = ""
 
     for r in range(len(listOfRows)):
         row_obj = listOfRows[r]  # row_obj is a of class list
-
 
         if f.contains_series(row_obj):
             series_name = f.normalize_name(row_obj[0])
@@ -61,15 +60,27 @@ with open(midfilename, newline='') as csvfile:
             SUBGROUP_INDEX = 2
             subgroup_name = row_obj[SUBGROUP_INDEX]
 
+        if f.contains_vendor_code(row_obj):
+            VENDOR_CODE_INDEX = 0
+            ITEM_SIZE_INDEX = 0
+            vendor_code = row_obj[VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
+
+            item_size = "".join(row_obj[ITEM_SIZE_INDEX].split()[0:3])
+
+
+
+
         if f.is_valid_row(row_obj):
             currow += 1  # go to the next row of the outfile to process
-            externalid = "{}-{:05d}".format(PC.VENDOR_NAME_CODE, (currow-1))  #formatted string
-            print(externalid)
+            externalid = "{}-{:05d}".format(PC.VENDOR_NAME_CODE, (currow - 1))  # formatted string
+
             sheet.cell(row=currow, column=1, value=externalid)
             sheet.cell(row=currow, column=4, value=series_name + " " + group_name + " " + subgroup_name)
+            sheet.cell(row=currow, column=6, value=vendor_code)
+            sheet.cell(row=currow, column=11, value=item_size)
+            print(row_obj)
 
-            # print(len(row_obj), row_obj)
-            # print(r, f.contains_series(row_obj), end=" ")
+
 
 # ---------------- UNCOMMENT THIS SAVE OUTFILE ------------------------
 wb.save(outfilename)
