@@ -38,6 +38,9 @@ def get_unit_price(row):
     return up
 
 
+
+
+
 # if length of row is 1 and the 0th item is not empty string then it contains group name
 def contains_group(row):
     contains = False
@@ -61,6 +64,14 @@ def contains_vendor_code(row):
     if len(row) == max(PC.ITEM_ROW_LEN) and len(row) - num_blanks(row) == 6:
         contains = True
     return contains
+
+def get_vendor_code(row):
+    code = ""
+    if '*' in row[PC.VENDOR_CODE_INDEX]:
+        code = row[PC.VENDOR_CODE_INDEX].split()[-2]
+    else:
+        code = row[PC.VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
+    return code
 
 
 def cell_is_blank(cell):
@@ -110,11 +121,11 @@ def convert_pdf_to_html(infilename):
 
         def __init__(self):
             HTMLParser.__init__(self)
-            self.pagedatalist = set()  # creates a new empty set to  hold data items from the html
+            self.page_data_list = set()  # creates a new empty set to  hold data items from the html
 
         def handle_data(self, data):  # method that handles data sent to parser
             # print("encountered some data: ", data)  #test for which data it can retrieve
-            self.pagedatalist.add(data)  # adds data item to the set for use in error checking algorithm
+            self.page_data_list.add(data)  # adds data item to the set for use in error checking algorithm
 
     parser = MyHtmlParser()
 
@@ -122,4 +133,4 @@ def convert_pdf_to_html(infilename):
         data = file.read().replace('\n', '')
         parser.feed(data)
 
-    print(parser.pagedatalist)  # output the pagedatalist for testing
+    print(parser.page_data_list)  # output the pagedatalist for testing

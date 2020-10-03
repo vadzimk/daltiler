@@ -10,9 +10,12 @@ import PCONST as PC  # contains pdf constants
 
 # do refactor to make a row a custom object with all the methods
 
-infilename = 'test4.pdf'
+infilename = 'test1.pdf'
 outfilename = 'output.xlsx'
 midfilename = 'out.csv'
+
+f.convert_pdf_to_html('test1.pdf')
+
 
 currow = 1  # contains the current row in the output file
 
@@ -41,6 +44,7 @@ with open(midfilename, newline='') as csvfile:
     readerObject = csv.reader(csvfile, dialect='excel')  # returns reader object that is an iterator
     listOfRows = list(readerObject)
 
+    # fields of pdf
     series_name = ""
     group_name = ""
     subgroup_name = ""
@@ -50,6 +54,11 @@ with open(midfilename, newline='') as csvfile:
     item_units_per_carton = ""
     units_of_measure = ""
     unit_price = ""
+
+    # fields of template
+    item_name = ""
+    display_name = ""
+    item_number_and_name = ""
 
     for r in range(len(listOfRows)):
         row_obj = listOfRows[r]  # row_obj is a of class list
@@ -65,9 +74,9 @@ with open(midfilename, newline='') as csvfile:
             subgroup_name = row_obj[SUBGROUP_INDEX]
 
         if f.contains_vendor_code(row_obj):
-            VENDOR_CODE_INDEX = 0
+
             ITEM_SIZE_INDEX = 0
-            vendor_code = row_obj[VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
+            vendor_code = f.get_vendor_code(row_obj)
 
             item_size = "".join(row_obj[ITEM_SIZE_INDEX].split()[0:3])
 
@@ -76,19 +85,28 @@ with open(midfilename, newline='') as csvfile:
         if f.is_valid_row(row_obj):
             currow += 1  # go to the next row of the outfile to process
             externalid = "{}-{:05d}".format(PC.VENDOR_NAME_CODE, (currow - 1))  # formatted string
-
             sheet.cell(row=currow, column=1, value=externalid)
-            sheet.cell(row=currow, column=4, value=series_name + " " + group_name + " " + subgroup_name)
+            item_name = series_name + " " + group_name + " " + subgroup_name
+            sheet.cell(row=currow, column=4, value=item_name)
             sheet.cell(row=currow, column=6, value=vendor_code)
             sheet.cell(row=currow, column=11, value=item_size)
-            sheet.cell(row=currow, column=10, value=f.get_item_color(row_obj))
+            item_color = f.get_item_color(row_obj)
+            sheet.cell(row=currow, column=10, value=item_color)
             sheet.cell(row=currow, column=9, value=f.get_units_per_carton(row_obj))
             sheet.cell(row=currow, column=7, value=f.get_units_of_measure(row_obj))  # compound field
             sheet.cell(row=currow, column=27, value=f.get_unit_price(row_obj))
 
-
+            # populate columns derived from data extracted from pdf only
+            sheet.cell(row=currow, column=2, value=externalid)
+            display_name = item_name + " " + item_size + " " + item_color + " " + vendor_code
+            display_name = " ".join(display_name.split())  # remove multiple spaces
+            sheet.cell(row=currow, column=3, value=display_name)
+            item_number_and_name = externalid + " " + item_name
+            sheet.cell(row=currow, column=5, value=item_number_and_name)
 
 # ---------------- UNCOMMENT THIS SAVE OUTFILE ------------------------
 wb.save(outfilename)
 # -------------------------------------------------------------------
 wb.close()
+
+
