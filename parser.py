@@ -1,3 +1,5 @@
+import shutil
+
 import openpyxl
 import csv
 import tabula
@@ -8,14 +10,29 @@ import TEMPLATE
 import functions as f  # contains major functions
 import PCONST as PC  # contains pdf constants
 
+import sys  # access to functions and variables that allow for working with Python interpreter
+import os
+
 # do refactor to make a row a custom object with all the methods
 
-infilename = 'test1.pdf'
+args = sys.argv  # get the list of arguments
+
+infilename = args[1] if len(args) == 2 else 'test1.pdf'  # infilename is the args[1] or default to 'test1.pdf'
+
+print(f"Working on {infilename}\nPlease wait....")
+
 outfilename = 'output.xlsx'
 midfilename = 'out.csv'
 
-f.convert_pdf_to_html('test1.pdf')
 
+
+# -------------------- UNCOMMENT THIS TO CONVERT TO HTML -----------------
+# # cleanup directory
+# if os.path.exists("xpdf") and os.path.isdir("xpdf"):
+#     print("xpdf exists, deleting it....")
+#     shutil.rmtree("xpdf")
+#f.convert_pdf_to_html('test1.pdf')
+# -------------------------------------------------------------------
 
 currow = 1  # contains the current row in the output file
 
@@ -44,7 +61,7 @@ with open(midfilename, newline='') as csvfile:
     readerObject = csv.reader(csvfile, dialect='excel')  # returns reader object that is an iterator
     listOfRows = list(readerObject)
 
-    # fields of pdf
+    # fields of pdf  # will be processed first
     series_name = ""
     group_name = ""
     subgroup_name = ""
@@ -55,7 +72,7 @@ with open(midfilename, newline='') as csvfile:
     units_of_measure = ""
     unit_price = ""
 
-    # fields of template
+    # fields of template  # will be populated after manual review
     item_name = ""
     display_name = ""
     item_number_and_name = ""
@@ -74,13 +91,12 @@ with open(midfilename, newline='') as csvfile:
             subgroup_name = row_obj[SUBGROUP_INDEX]
 
         if f.contains_vendor_code(row_obj):
-
             ITEM_SIZE_INDEX = 0
             vendor_code = f.get_vendor_code(row_obj)
 
             item_size = "".join(row_obj[ITEM_SIZE_INDEX].split()[0:3])
 
-        print(len(row_obj), row_obj)
+        # print(len(row_obj), row_obj)  # test printout row
 
         if f.is_valid_row(row_obj):
             currow += 1  # go to the next row of the outfile to process
@@ -109,4 +125,4 @@ wb.save(outfilename)
 # -------------------------------------------------------------------
 wb.close()
 
-
+print("Done!")  # indicate the end of the program
