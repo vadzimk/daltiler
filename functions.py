@@ -5,10 +5,12 @@ from html.parser import HTMLParser
 import PCONST as PC  # contains pdf constants
 
 
+# +
 def contains_series(row):
     return PC.DETECT_SERIES_SET.issubset(set(row))
 
 
+# +
 def get_series_name(row):
     name = ""
     if "#" in row[0]:
@@ -17,39 +19,38 @@ def get_series_name(row):
         name = row[0] + " " + row[2]
     return " ".join(name.split())  # remove multiple spaces
 
-
+# +
 def get_item_color(row):
     color = row[3]
     return color
 
-
+# +
 def get_units_per_carton(row):
     upc = row[4]
     return upc
 
-
+# +
 def get_units_of_measure(row):
     uom = row[5]
     return uom
 
-
+# +
 def get_unit_price(row):
     up = row[6]
     return up
 
 
-
-
-
-# if length of row is 1 and the 0th item is not empty string then it contains group name
+# +
 def contains_group(row):
+    """# if length of row is 1 and the 0th item is not empty string
+     then it contains group name"""
     contains = False
     if num_blanks(row) == len(row) - 1 and not cell_is_blank(row[0]):
         contains = True
     return contains
 
 
-# subgroup is like "BULLNOSE"
+# +
 def contains_subgroup(row):
     contains = False
     # if row has 7 columns and at least 5 of them are not blank (for now)
@@ -58,6 +59,7 @@ def contains_subgroup(row):
     return contains
 
 
+# +
 def contains_vendor_code(row):
     contains = False
     # if row has 7 columns and at least 6 of them are not blank (for now)
@@ -65,6 +67,8 @@ def contains_vendor_code(row):
         contains = True
     return contains
 
+
+# +
 def get_vendor_code(row):
     code = ""
     if '*' in row[PC.VENDOR_CODE_INDEX]:
@@ -74,12 +78,14 @@ def get_vendor_code(row):
     return code
 
 
+# +
 def cell_is_blank(cell):
     return cell == '\"\"' or not cell
 
 
-# counts number of blanks in a given row
+# +
 def num_blanks(row):
+    """ counts number of blanks in a given row"""
     count_blank = 0
     for i in range(len(row)):
         if cell_is_blank(row[i]):
@@ -87,8 +93,9 @@ def num_blanks(row):
     return count_blank
 
 
-# returns true if the row from midfile to be output in the outfile
+# + as is_table_row
 def is_valid_row(row):
+    """returns true if the row from midfile to be output in the outfile"""
     row_set = set(row)
     is_valid = False
     if len(row) - num_blanks(row) in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(

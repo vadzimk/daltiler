@@ -12,6 +12,6 @@ archive/
 */*/__pycache__/
 */__pycache__/
 
-
+tests.py
 
 xpdf/

@@ -20,9 +20,9 @@ args = sys.argv  # get the list of arguments
 infilename = args[1] if len(args) == 2 else 'test1.pdf'  # infilename is the args[1] or default to 'test1.pdf'
 
 print(f"Working on {infilename}\nPlease wait....")
-
-outfilename = 'output.xlsx'
 midfilename = 'out.csv'
+outfilename = 'output.xlsx'
+
 
 
 
@@ -99,6 +99,7 @@ with open(midfilename, newline='') as csvfile:
         # print(len(row_obj), row_obj)  # test printout row
 
         if f.is_valid_row(row_obj):
+            """this pdf_line is a valid table row"""
             currow += 1  # go to the next row of the outfile to process
             externalid = "{}-{:05d}".format(PC.VENDOR_NAME_CODE, (currow - 1))  # formatted string
             sheet.cell(row=currow, column=1, value=externalid)
