@@ -11,4 +11,4 @@ print(f"Working on {infilename}\nPlease wait....")
 
 outfilename = 'output.xlsx'
 
-price_list = PdfDoc(infilename, 1, 2)
+price_list = PdfDoc(infilename, page_start=1, n_pages=1)

@@ -10,9 +10,10 @@ import csv
 class PdfDoc:
     """ manages a list of PdfPage objects"""
 
-    def __init__(self, in_file_name, page_start=1, page_stop=2):
+    def __init__(self, in_file_name, page_start=1, n_pages=1):
+        """by default grabs the first page only"""
         self._pages = [PdfPage(in_file_name, pagenumber=i) for i in
-                       range(page_start, page_stop)]  # list of PdfPage objects
+                       range(page_start, page_start + n_pages)]  # list of PdfPage objects
 
 
 class PdfPage:
@@ -49,7 +50,6 @@ class PageProductTable:
         # ----------------   CONTINUE: PUT LINES IN THE DICTIONARY -----------------------
         # MAYBE MOVE PROPERTIES FROM PDFLINE CLASS INTO THIS CLASS ....?
         print(self.products)
-
 
     def get_list_of_products(self):
         return self.products
@@ -94,7 +94,6 @@ class CsvLine:
     def fill_data(self):
         """ takes data from Excel_table_row and puts it in the csv_row according to business logic"""
         pass
-
 
 
 class CsvTable:
