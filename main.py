@@ -12,7 +12,7 @@ args = sys.argv  # get the list of arguments
 
 
 
-infilename = args[1] if len(args) == 2 else 'test1.pdf'  # infilename is the args[1] or default to 'test1.pdf'
+infilename = args[1] if len(args) == 2 else 'test5.pdf'  # infilename is the args[1] or default to 'test1.pdf'
 
 print(f"Working on {infilename}\nPlease wait....")
 

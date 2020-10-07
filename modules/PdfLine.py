@@ -14,6 +14,7 @@ class PdfLine:
         self._num_blanks = self.count_blanks()
         self._is_table_row = False
         self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
+        print(self._row_len, self._row)
 
 
 
@@ -105,6 +106,9 @@ class PdfLine:
         if self.contains_color():
             color = self._row[3]
         return color
+
+    def contains_units_per_carton(self):
+        pass
 
     def find_units_per_carton(self):
         upc = self._row[4]
