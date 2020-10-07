@@ -1,4 +1,4 @@
-import PCONST as PC
+import PDF_CONST as PFC
 
 
 class PdfLine:
@@ -15,19 +15,11 @@ class PdfLine:
         self._is_table_row = False
         self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
 
-        self._series_name = self.find_series_name()
-        self._group = self.find_group()
-        self._subgroup = self.find_subgroup()  # subgroup is like "BULLNOSE"
-        self._vendor_code = self.find_vendor_code()
-        self._item_size = self.find_item_size()
-        self._item_color = self.find_item_color()
-        self._units_per_carton = self.find_units_per_carton()
-        self._units_of_measure = self.find_units_of_measure()
-        self._unit_price = self.find_unit_price()
+
 
     def contains_series(self):
         """ detects series name in the row"""
-        return PC.DETECT_SERIES_SET.issubset(set(self._row))
+        return PFC.DETECT_SERIES_SET.issubset(set(self._row))
 
     def find_series_name(self):
         """ if row contains series then returns it otherwise returns None """
@@ -52,7 +44,7 @@ class PdfLine:
         """if length of row is 1 and the 0th item is not empty string
          then it contains group name"""
         contains = False
-        if self._num_blanks == self._row_len - 1 and not PdfLine.token_is_blank:
+        if self._num_blanks == self._row_len - 1 and not PdfLine.token_is_blank(self._row[0]):
             contains = True
         return contains
 
@@ -65,7 +57,7 @@ class PdfLine:
     def contains_subgroup(self):
         contains = False
         # if row has 7 columns and at least 5 of them are not blank (for now)
-        if self._row_len == max(PC.ITEM_ROW_LEN) and self._row_len - self._num_blanks in PC.ITEM_ROW_LEN:
+        if self._row_len == max(PFC.ITEM_ROW_LEN) and self._row_len - self._num_blanks in PFC.ITEM_ROW_LEN:
             contains = True
         return contains
 
@@ -79,7 +71,7 @@ class PdfLine:
     def all_cells_filled(self):
         all_filled = False
         # if row has 7 columns and at least 6 of them are not blank (for now)
-        if self._row_len == max(PC.ITEM_ROW_LEN) and self._row_len - self._num_blanks == 6:
+        if self._row_len == max(PFC.ITEM_ROW_LEN) and self._row_len - self._num_blanks == 6:
             all_filled = True
         return all_filled
 
@@ -89,10 +81,10 @@ class PdfLine:
     def find_vendor_code(self):
         code = None
         if self.contains_vendor_code():
-            if '*' in self._row[PC.VENDOR_CODE_INDEX]:
-                code = self._row[PC.VENDOR_CODE_INDEX].split()[-2]
+            if '*' in self._row[PFC.VENDOR_CODE_INDEX]:
+                code = self._row[PFC.VENDOR_CODE_INDEX].split()[-2]
             else:
-                code = self._row[PC.VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
+                code = self._row[PFC.VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
         return code
 
     def contains_item_size(self):
@@ -130,8 +122,8 @@ class PdfLine:
         """returns true if the row from midfile to be output in the outfile"""
         row_set = set(self._row)
         is_valid = False
-        if self._row_len - self._num_blanks in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(
-                row_set) and PC.EMPTY_LINE_FLAGS.isdisjoint(
+        if self._row_len - self._num_blanks in PFC.ITEM_ROW_LEN and PFC.DETECT_SERIES_SET.isdisjoint(
+                row_set) and PFC.EMPTY_LINE_FLAGS.isdisjoint(
             row_set):
             is_valid = True
         return is_valid

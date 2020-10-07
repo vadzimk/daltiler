@@ -8,7 +8,7 @@ import subprocess
 
 import TEMPLATE
 import functions as f  # contains major functions
-import PCONST as PC  # contains pdf constants
+import PDF_CONST as PFC  # contains pdf constants
 
 import sys  # access to functions and variables that allow for working with Python interpreter
 import os
@@ -98,10 +98,10 @@ with open(midfilename, newline='') as csvfile:
 
         # print(len(row_obj), row_obj)  # test printout row
 
-        if f.is_valid_row(row_obj):
+        if f.is_table_row(row_obj):
             """this pdf_line is a valid table row"""
             currow += 1  # go to the next row of the outfile to process
-            externalid = "{}-{:05d}".format(PC.VENDOR_NAME_CODE, (currow - 1))  # formatted string
+            externalid = "{}-{:05d}".format(PFC.VENDOR_NAME_CODE, (currow - 1))  # formatted string
             sheet.cell(row=currow, column=1, value=externalid)
             item_name = series_name + " " + group_name + " " + subgroup_name
             sheet.cell(row=currow, column=4, value=item_name)

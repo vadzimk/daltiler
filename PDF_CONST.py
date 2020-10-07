@@ -19,3 +19,4 @@ PRODUCT_TABLE_FIELDS = [
     "_units_of_measure",
     "_unit_price"
 ]
+

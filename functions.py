@@ -2,12 +2,12 @@
 import subprocess
 from html.parser import HTMLParser
 
-import PCONST as PC  # contains pdf constants
+import PDF_CONST as PFC  # contains pdf constants
 
 
 # +
 def contains_series(row):
-    return PC.DETECT_SERIES_SET.issubset(set(row))
+    return PFC.DETECT_SERIES_SET.issubset(set(row))
 
 
 # +
@@ -54,7 +54,7 @@ def contains_group(row):
 def contains_subgroup(row):
     contains = False
     # if row has 7 columns and at least 5 of them are not blank (for now)
-    if len(row) == max(PC.ITEM_ROW_LEN) and len(row) - num_blanks(row) in PC.ITEM_ROW_LEN:
+    if len(row) == max(PFC.ITEM_ROW_LEN) and len(row) - num_blanks(row) in PFC.ITEM_ROW_LEN:
         contains = True
     return contains
 
@@ -63,7 +63,7 @@ def contains_subgroup(row):
 def contains_vendor_code(row):
     contains = False
     # if row has 7 columns and at least 6 of them are not blank (for now)
-    if len(row) == max(PC.ITEM_ROW_LEN) and len(row) - num_blanks(row) == 6:
+    if len(row) == max(PFC.ITEM_ROW_LEN) and len(row) - num_blanks(row) == 6:
         contains = True
     return contains
 
@@ -71,10 +71,10 @@ def contains_vendor_code(row):
 # +
 def get_vendor_code(row):
     code = ""
-    if '*' in row[PC.VENDOR_CODE_INDEX]:
-        code = row[PC.VENDOR_CODE_INDEX].split()[-2]
+    if '*' in row[PFC.VENDOR_CODE_INDEX]:
+        code = row[PFC.VENDOR_CODE_INDEX].split()[-2]
     else:
-        code = row[PC.VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
+        code = row[PFC.VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
     return code
 
 
@@ -94,12 +94,12 @@ def num_blanks(row):
 
 
 # + as is_table_row
-def is_valid_row(row):
+def is_table_row(row):
     """returns true if the row from midfile to be output in the outfile"""
     row_set = set(row)
     is_valid = False
-    if len(row) - num_blanks(row) in PC.ITEM_ROW_LEN and PC.DETECT_SERIES_SET.isdisjoint(
-            row_set) and PC.EMPTY_LINE_FLAGS.isdisjoint(
+    if len(row) - num_blanks(row) in PFC.ITEM_ROW_LEN and PFC.DETECT_SERIES_SET.isdisjoint(
+            row_set) and PFC.EMPTY_LINE_FLAGS.isdisjoint(
         row_set):
         is_valid = True
     return is_valid
