@@ -13,10 +13,6 @@ def cleanup():
         print("Deleting old project flies...")
         shutil.rmtree(PR.DIR_PROJECT)
 
-    if os.path.exists("xpdf") and os.path.isdir("xpdf"):
-        print("xpdf exists, deleting it....")
-        shutil.rmtree("xpdf")
-
 
 def create_project():
     print("Creating new project directory")

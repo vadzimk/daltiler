@@ -8,7 +8,8 @@ class PdfLine:
     def token_is_blank(csv_list_item):
         return csv_list_item == '\"\"' or not csv_list_item
 
-    def __init__(self, tabula_csv_reader_list_line):
+    def __init__(self, tabula_csv_reader_list_line, page_data_set):
+        """ @:param page_data_set for better detection of tokens"""
         self._row = tabula_csv_reader_list_line  # list corresponding to a line in the csv_reader file
         self._row_len = len(self._row)  # number of items in the list representing the row
         self._num_blanks = self.count_blanks()

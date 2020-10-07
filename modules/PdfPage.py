@@ -32,10 +32,11 @@ class PdfPage:
             data = file.read().replace('\n', '')
             html_parser.feed(data)
 
+        self._page_data_set = html_parser.page_data_set
         print(html_parser.page_data_set)  # output the pagedata_set for testing
 
+        # constructs list of PdfLine objects
+        self._pdf_line_list = [PdfLine(line, self._page_data_set) for line in self.list_of_csv_rows]
 
-
-        self._pdf_line_list = [PdfLine(line) for line in self.list_of_csv_rows]  # constructs list of PdfLine objects
         self._product_table = PageProductTable(self._pdf_line_list, pagenumber)
         self._color_table = PageColorTable(self._pdf_line_list, pagenumber)
