@@ -1,1 +1,0 @@
-DIR_TABULATED_CSV = './project/tabulated_csv/'

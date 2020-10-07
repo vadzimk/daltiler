@@ -1,17 +1,12 @@
-import shutil
-
-import openpyxl
 import csv
 import tabula
 from openpyxl import Workbook
-import subprocess
 
 import TEMPLATE
-import functions as f  # contains major functions
+from functional_proto import functions as f
 import PDF_CONST as PFC  # contains pdf constants
 
 import sys  # access to functions and variables that allow for working with Python interpreter
-import os
 
 # do refactor to make a row a custom object with all the methods
 
