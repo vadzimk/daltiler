@@ -10,16 +10,21 @@ from modules import PROJ_CONST as PR
 
 def cleanup():
     if os.path.exists(PR.DIR_PROJECT) and os.path.isdir(PR.DIR_PROJECT):
-        print("Deleting old project flies...")
         shutil.rmtree(PR.DIR_PROJECT)
+        print("Old project flies deleted.")
 
 
 def create_project():
-    print("Creating new project directory")
     # create directory for the project
     Path(PR.DIR_PROJECT).mkdir(parents=False, exist_ok=True)
     Path(PR.DIR_TABULATED_CSV).mkdir(parents=False, exist_ok=True)
     Path(PR.DIR_PRODUCT_TABLES).mkdir(parents=False, exist_ok=True)
+
+
+    if os.path.exists(PR.DIR_PROJECT) and os.path.isdir(PR.DIR_PROJECT):
+        print(f"New project directory {PR.DIR_PROJECT} created.")
+    else:
+        print(f"New project directory {PR.DIR_PROJECT} creation FAILED.")
 
 
 class MyHtmlParser(HTMLParser):

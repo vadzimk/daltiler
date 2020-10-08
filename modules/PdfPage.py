@@ -16,6 +16,7 @@ class PdfPage:
     def __init__(self, infilename, pagenumber):
         self.midfilename = '{}tabulated_{}.csv'.format(PR.DIR_TABULATED_CSV, pagenumber)
         self.list_of_csv_rows = None  # contain list of rows from the csv file obtained from tabula
+        self._page_data_set = set()
         # read the one page from pdf file with tabula
         tabula.convert_into(infilename, self.midfilename, output_format='csv', pages=pagenumber, stream=True)
 
@@ -25,7 +26,15 @@ class PdfPage:
             self.list_of_csv_rows = list(readerObject)
 
         # run pdftohtml https://www.xpdfreader.com/pdftohtml-man.html
-        subprocess.run(["pdftohtml", "-q -f -nofonts {} -l {}".format(pagenumber, pagenumber), infilename, PR.DIR_XPDF])
+
+        command ="pdftohtml -q -f {} -l {} {} {}".format(pagenumber, pagenumber, infilename, PR.DIR_XPDF).split()
+        pdftohtml_process = subprocess.run(command)
+
+
+        # signal error from pdftohtml process
+        if pdftohtml_process.returncode:
+            print(f"pdftohtml return code: {pdftohtml_process.returncode}")
+
         html_parser = MyHtmlParser()
 
         with open('{}page{}.html'.format(PR.DIR_XPDF, pagenumber), 'r') as file:
@@ -33,7 +42,7 @@ class PdfPage:
             html_parser.feed(data)
 
         self._page_data_set = html_parser.page_data_set
-        print(html_parser.page_data_set)  # output the pagedata_set for testing
+        print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing
 
         # constructs list of PdfLine objects
         self._pdf_line_list = [PdfLine(line, self._page_data_set) for line in self.list_of_csv_rows]
