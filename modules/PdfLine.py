@@ -8,14 +8,16 @@ class PdfLine:
     def token_is_blank(csv_list_item):
         return csv_list_item == '\"\"' or not csv_list_item
 
-    def __init__(self, tabula_csv_reader_list_line, page_data_set):
+    def __init__(self, tabula_csv_reader_list_line, page_data_set, color_table_below):
         """ @:param page_data_set for better detection of tokens"""
         self._row = tabula_csv_reader_list_line  # list corresponding to a line in the csv_reader file
+        self._page_data_set = page_data_set
+        self._color_table_below = color_table_below
         self._row_len = len(self._row)  # number of items in the list representing the row
         self._num_blanks = self.count_blanks()
-        self._is_table_row = False
         self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
-        print(self._row_len, self._row)
+        self._is_color_table_row = self.is_color_table_row()
+        self._is_product_table_row = self.is_product_table_row()
 
 
 
@@ -100,30 +102,47 @@ class PdfLine:
         return item_size
 
     def contains_color(self):
-        return True
+        contains = False
+
+        if not self._color_table_below and self._is_product_table_row:
+            contains = True
+        elif self._color_table_below and self._is_product_table_row:
+            contains = False
+        elif self._color_table_below and self._is_color_table_row: # this is a color table row and it contains color if _row_len==2
+            contains = True
+        return contains
+
 
     def find_item_color(self):
         color = None
-        if self.contains_color():
+        if self.contains_color() and self._is_product_table_row:
             color = self._row[3]
+        elif self.contains_color() and self._is_color_table_row:
+            color = self._row[1]
         return color
 
     def contains_units_per_carton(self):
         pass
 
     def find_units_per_carton(self):
-        upc = self._row[4]
+        upc = None
+        if self._is_product_table_row:
+            upc = self._row[4]
         return upc
 
     def find_units_of_measure(self):
-        uom = self._row[5]
+        uom = None
+        if self._is_product_table_row:
+            uom = self._row[5]
         return uom
 
     def find_unit_price(self):
-        up = self._row[6]
+        up = None
+        if self._is_product_table_row:
+            up = self._row[6]
         return up
 
-    def is_table_row(self):
+    def is_product_table_row(self):
         """returns true if the row from midfile to be output in the outfile"""
         row_set = set(self._row)
         is_valid = False
@@ -132,3 +151,6 @@ class PdfLine:
             row_set):
             is_valid = True
         return is_valid
+
+    def is_color_table_row(self):
+        return self._color_table_below and self._row_len == 2

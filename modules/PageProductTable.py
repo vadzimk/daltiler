@@ -39,7 +39,7 @@ class PageProductTable:
             self._units_of_measure = line.find_units_of_measure() if line.find_units_of_measure() else self._units_of_measure
             self._unit_price = line.find_unit_price() if line.find_unit_price() else self._unit_price
 
-            if line.is_table_row():
+            if line.is_product_table_row():
                 """push properties to the dictionary"""
                 for key in PFC.PRODUCT_TABLE_FIELDS:
                     value = eval("self.%s" % (key))  # line at key
