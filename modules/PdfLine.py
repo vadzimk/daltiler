@@ -68,7 +68,10 @@ class PdfLine:
     def find_subgroup(self):
         subgroup_name = None
         if self.contains_subgroup():
-            SUBGROUP_INDEX = 2
+            if not self._color_table_below:
+                SUBGROUP_INDEX = 2
+            else:
+                SUBGROUP_INDEX = 3
             subgroup_name = self._row[SUBGROUP_INDEX]
         return subgroup_name
 
@@ -84,11 +87,15 @@ class PdfLine:
 
     def find_vendor_code(self):
         code = None
+        if not self._color_table_below:
+            vendor_code_index = PFC.VENDOR_CODE_INDEX
+        else:
+            vendor_code_index = 2
         if self.contains_vendor_code():
-            if '*' in self._row[PFC.VENDOR_CODE_INDEX]:
-                code = self._row[PFC.VENDOR_CODE_INDEX].split()[-2]
+            if '*' in self._row[vendor_code_index]:
+                code = self._row[vendor_code_index].split()[-2]
             else:
-                code = self._row[PFC.VENDOR_CODE_INDEX].split()[-1]  # the last item of the returned by split list
+                code = self._row[vendor_code_index].split()[-1]  # the last item of the returned by split list
         return code
 
     def contains_item_size(self):

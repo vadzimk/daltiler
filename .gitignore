@@ -2,6 +2,7 @@ archive/
 *.xlsx
 *.pdf
 *.csv
+*.txt
 .idea
 
 

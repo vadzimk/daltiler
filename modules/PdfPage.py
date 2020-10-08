@@ -44,7 +44,7 @@ class PdfPage:
         self._page_data_set = html_parser.page_data_set
         print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing
 
-        self._contains_color_table = False
+        self._contains_color_table = True
 
         # constructs list of PdfLine objects
         self._pdf_line_list = [PdfLine(line, self._page_data_set, self._contains_color_table) for line in self.list_of_csv_rows]
