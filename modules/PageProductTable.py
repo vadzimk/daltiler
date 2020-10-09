@@ -7,8 +7,13 @@ from modules import PROJ_CONST as PR
 class PageProductTable:
     """ contains products in a dictionary """
 
-    def __init__(self, lines, page_number):
-        self.__products = {key: [] for key in PFC.PRODUCT_TABLE_FIELDS}  # dictionary that will hold the items of the table
+    def __init__(self, lines, page_number, colors):
+        self.lines = lines
+        self.colors = colors
+
+        self.__products = {key: [] for key in
+                           PFC.PRODUCT_TABLE_FIELDS}  # dictionary that will hold the items of the table
+        #  fields of the csv data frame:
         self._series_name = None
         self._group = None
         self._subgroup = None  # subgroup is like "BULLNOSE"
@@ -19,15 +24,15 @@ class PageProductTable:
         self._units_of_measure = None
         self._unit_price = None
 
-        self.build_table(lines)  # put products in the dictionary
+        self.build_table()  # put products in the dictionary
 
         # export product table as csv
         df = pandas.DataFrame(self.__products)
         df.to_csv('{}data_frame{}.csv'.format(PR.DIR_PRODUCT_TABLES, page_number), index=False)
 
-    def build_table(self, lines):
+    def build_table(self):
         """ sees what fields are detected by the PdfLine and builds product table"""
-        for line in lines:
+        for line in self.lines:
             """collect the fields"""
             self._series_name = line.find_series_name() if line.find_series_name() else self._series_name
             self._group = line.find_group() if line.find_group() else self._group
@@ -39,11 +44,21 @@ class PageProductTable:
             self._units_of_measure = line.find_units_of_measure() if line.find_units_of_measure() else self._units_of_measure
             self._unit_price = line.find_unit_price() if line.find_unit_price() else self._unit_price
 
+            multiplier = 1  # number of times the row must be multiplied
+            if self.colors:  # if color list is present, a product row will be appended the number of colors times
+                multiplier = len(self.colors)
+
+
+
             if line.is_product_table_row():
                 """push properties to the dictionary"""
-                for key in PFC.PRODUCT_TABLE_FIELDS:
-                    value = eval("self.%s" % (key))  # line at key
-                    self.__products[key].append(value)
+                for i in range(multiplier):
+                    for key in PFC.PRODUCT_TABLE_FIELDS:
+                        if self.colors and key == "_item_color":
+                            value = self.colors[i]
+                        else:
+                            value = eval("self.%s" % (key))  # line at key
+                        self.__products[key].append(value)
 
     def get_products(self):
         """@:returns the dictionary of products representing product table of the page"""

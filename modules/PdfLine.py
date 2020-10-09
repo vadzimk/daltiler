@@ -20,7 +20,6 @@ class PdfLine:
         self._is_product_table_row = self.is_product_table_row()
 
 
-
     def contains_series(self):
         """ detects series name in the row"""
         return PFC.DETECT_SERIES_SET.issubset(set(self._row))
@@ -59,11 +58,12 @@ class PdfLine:
         return group_name
 
     def contains_subgroup(self):
-        contains = False
-        # if row has 7 columns and at least 5 of them are not blank (for now)
-        if self._row_len == max(PFC.ITEM_ROW_LEN) and self._row_len - self._num_blanks in PFC.ITEM_ROW_LEN:
-            contains = True
-        return contains
+        # contains = False
+        # # if row has 7 columns and at least 5 of them are not blank (for now)
+        # if self._row_len == max(PFC.ITEM_ROW_LEN) and self._row_len - self._num_blanks in PFC.ITEM_ROW_LEN:
+        #     contains = True
+        # return contains
+        return self._is_product_table_row
 
     def find_subgroup(self):
         subgroup_name = None
@@ -71,7 +71,7 @@ class PdfLine:
             if not self._color_table_below:
                 SUBGROUP_INDEX = 2
             else:
-                SUBGROUP_INDEX = 3
+                SUBGROUP_INDEX = 2 # some rows 3
             subgroup_name = self._row[SUBGROUP_INDEX]
         return subgroup_name
 
@@ -82,24 +82,9 @@ class PdfLine:
             all_filled = True
         return all_filled
 
-    def contains_vendor_code(self):
-        return self.all_cells_filled()
-
-    def find_vendor_code(self):
-        code = None
-        if not self._color_table_below:
-            vendor_code_index = PFC.VENDOR_CODE_INDEX
-        else:
-            vendor_code_index = 2
-        if self.contains_vendor_code():
-            if '*' in self._row[vendor_code_index]:
-                code = self._row[vendor_code_index].split()[-2]
-            else:
-                code = self._row[vendor_code_index].split()[-1]  # the last item of the returned by split list
-        return code
-
     def contains_item_size(self):
-        return self.all_cells_filled
+        return self._is_product_table_row
+        # return self.all_cells_filled()
 
     def find_item_size(self):
         item_size = None
@@ -108,6 +93,27 @@ class PdfLine:
             item_size = "".join(self._row[ITEM_SIZE_INDEX].split()[0:3])
         return item_size
 
+    def contains_vendor_code(self):
+        # return self.all_cells_filled()
+        return self._is_product_table_row
+
+    def find_vendor_code(self):
+        code = None
+        if not self._color_table_below:
+            vendor_code_index = PFC.VENDOR_CODE_INDEX
+        else:
+            vendor_code_index = 0 # is 2 in some pages
+        if self.contains_vendor_code():
+            if '*' in self._row[vendor_code_index]:
+                code = self._row[vendor_code_index].split(' ')[-2]
+            else:
+
+                code = self._row[vendor_code_index].split(' ')[-1]  # the last item of the returned by split list
+        print(self.contains_item_size(), self._row_len, self.contains_vendor_code(), code, vendor_code_index, self._row[vendor_code_index], self._row)
+        return code
+
+
+
     def contains_color(self):
         contains = False
 
@@ -115,17 +121,16 @@ class PdfLine:
             contains = True
         elif self._color_table_below and self._is_product_table_row:
             contains = False
-        elif self._color_table_below and self._is_color_table_row: # this is a color table row and it contains color if _row_len==2
+        elif self._color_table_below and self._is_color_table_row:  # this is a color table row and it contains color if _row_len==3
             contains = True
         return contains
-
 
     def find_item_color(self):
         color = None
         if self.contains_color() and self._is_product_table_row:
             color = self._row[3]
         elif self.contains_color() and self._is_color_table_row:
-            color = self._row[1]
+            color = ' '.join(self._row).strip()
         return color
 
     def contains_units_per_carton(self):
@@ -134,19 +139,19 @@ class PdfLine:
     def find_units_per_carton(self):
         upc = None
         if self._is_product_table_row:
-            upc = self._row[4]
+            upc = self._row[-3]
         return upc
 
     def find_units_of_measure(self):
         uom = None
         if self._is_product_table_row:
-            uom = self._row[5]
+            uom = self._row[-2]
         return uom
 
     def find_unit_price(self):
         up = None
         if self._is_product_table_row:
-            up = self._row[6]
+            up = self._row[-1]
         return up
 
     def is_product_table_row(self):
@@ -160,4 +165,6 @@ class PdfLine:
         return is_valid
 
     def is_color_table_row(self):
-        return self._color_table_below and self._row_len == 2
+        is_ctr = False
+        is_ctr = self._color_table_below and (self._row_len == 2 or self._row_len == 3) and self._row_len - self._num_blanks == 2
+        return is_ctr
