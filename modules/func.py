@@ -57,3 +57,20 @@ def determine_n_pages(infilename):
             infilename_n_pages = item.split()[-1]
     return infilename_n_pages
 
+def ask_for_filename(args):
+    infilename = None
+    if len(args) == 2:
+        infilename = args[1]
+    else:
+        infilename = input("Enter the name of pdf file:")
+        if ".pdf" not in infilename and not len(infilename.split()) == 0:
+            infilename += ".pdf"
+    return infilename
+
+def ask_for_n_pages(num):
+    n = None
+    ans = input(f"Detected {num} pages.\nHow many pages to process:")
+    if ans.isdigit():
+        n = int(ans)
+    return n
+

@@ -2,7 +2,6 @@ import csv
 
 import tabula
 
-
 from modules.PageProductTable import PageProductTable
 from modules import PROJ_CONST as PR
 from modules.PdfLine import PdfLine
@@ -26,20 +25,7 @@ class PdfPage:
             readerObject = csv.reader(csvfile, dialect='excel')  # returns reader object that is an iterator
             self.list_of_csv_rows = list(readerObject)
 
-
-
-        # ==============================================================
-        # # run pdftohtml https://www.xpdfreader.com/pdftohtml-man.html
-        #
-        # command ="pdftohtml -q -f {} -l {} {} {}".format(pagenumber, pagenumber, infilename, PR.DIR_XPDF).split()
-        # pdftohtml_process = subprocess.run(command)
-        #
-        #
-        # # signal error from pdftohtml process
-        # if pdftohtml_process.returncode:
-        #     print(f"pdftohtml return code: {pdftohtml_process.returncode}")
-    #     =============================================================
-
+        #  get data from html pages
         html_parser = MyHtmlParser()
 
         with open('{}page{}.html'.format(PR.DIR_XPDF, pagenumber), 'r') as file:
@@ -52,18 +38,16 @@ class PdfPage:
         self._contains_color_table = self.contains_color_table()
 
         # constructs list of PdfLine objects
-        self._pdf_line_list = [PdfLine(line, self._page_data_set, self._contains_color_table) for line in self.list_of_csv_rows]
+        self._pdf_line_list = [PdfLine(line, self._page_data_set, self._contains_color_table) for line in
+                               self.list_of_csv_rows]
 
         # if color_table below, extract colors from it
         self._color_list = None
         if self._contains_color_table:
             self._color_list = [line.find_item_color() for line in self._pdf_line_list if
-                            line.contains_color()]  # list comprehension with if condition at the end(if-else goes at the front)
+                                line.contains_color()]  # list comprehension with if condition at the end(if-else goes at the front)
 
         self._product_table = PageProductTable(self._pdf_line_list, pagenumber, self._color_list)
-
-
-
 
     def contains_color_table(self):
         contains = False
@@ -71,5 +55,3 @@ class PdfPage:
             if "COLORS" in token:
                 contains = True
         return contains
-
-
