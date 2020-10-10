@@ -11,14 +11,16 @@ class PdfLine:
     def __init__(self, tabula_csv_reader_list_line, page_data_set, color_table_below):
         """ @:param page_data_set for better detection of tokens"""
         self._tablula_line = tabula_csv_reader_list_line
-        self._row = tabula_csv_reader_list_line  # treat row here
+        self._row =  tabula_csv_reader_list_line
         self._page_data_set = page_data_set
         self._color_table_below = color_table_below
         self._row_len = len(self._row)  # number of items in the list representing the row
         self._num_blanks = self.count_blanks()
         # self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
+        self._is_color_table_header = self.is_color_table_header()
         self._is_color_table_row = self.is_color_table_row()
         self._is_product_table_row = self.is_product_table_row()
+
 
     def contains_series(self):
         """ detects series name in the row"""
@@ -48,7 +50,7 @@ class PdfLine:
          then it contains group name"""
         contains = False
         if self._num_blanks == self._row_len - 1 and not PdfLine.token_is_blank(
-                self._row[0]) and not "COLORS" in self._row:
+                self._row[0]) and not self._is_color_table_header:
             contains = True
         return contains
 
@@ -65,9 +67,10 @@ class PdfLine:
         subgroup_name = None
         if self.contains_subgroup():
             if len(self._row) > 6:
-                SUBGROUP_INDEX = 2 #3
+                SUBGROUP_INDEX = 2 #2
             else:
                 SUBGROUP_INDEX = 2
+                print("fsg", self._row)
             subgroup_name = self._row[SUBGROUP_INDEX]
         return subgroup_name
 
@@ -144,12 +147,19 @@ class PdfLine:
         """returns true if the row from midfile to be output in the outfile"""
         row_set = set(self._row)
         is_valid = False
-        if not self.contains_series() and not self.contains_group() and PFC.DETECT_SERIES_SET.isdisjoint(
+        if not self.contains_series() and not self.contains_group() and not self._is_color_table_row and not self._is_color_table_header and PFC.DETECT_SERIES_SET.isdisjoint(
                 row_set) and PFC.EMPTY_LINE_FLAGS.isdisjoint(
             row_set):
             is_valid = True
             print(self._row)
         return is_valid
+
+    def is_color_table_header(self):
+        is_header = False
+        for item in self._row:
+            if "COLORS" in item:
+                is_header = True
+        return is_header
 
     def is_color_table_row(self):
         is_ctr = False
