@@ -10,9 +10,10 @@ class PdfLine:
 
     def __init__(self, tabula_csv_reader_list_line, page_data_set, color_table_below):
         """ @:param page_data_set for better detection of tokens"""
-        self._tablula_line = tabula_csv_reader_list_line
-        self._row =  tabula_csv_reader_list_line
         self._page_data_set = page_data_set
+        self._tablula_line = tabula_csv_reader_list_line
+        self._row = self.treat_row()
+
         self._color_table_below = color_table_below
         self._row_len = len(self._row)  # number of items in the list representing the row
         self._num_blanks = self.count_blanks()
@@ -178,11 +179,29 @@ class PdfLine:
             return self.extract_first_match(" ".join(phrase.split()[:-1]))  # remove the last word from the token
 
     def treat_row(self):
+        """ compares token in row to the html dataset and separates string into items that are present in the html dataset"""
+        tabula_line = []
+        for token in self._tablula_line:
+            print(" ".join(token.split()))
+            tabula_line.append(" ".join(token.split()))
+
         row = []
-        for phrase in self._tablula_line:
-            i = 0  # holds index of the next place to search for a token
-            while i < len(phrase[i:]):
-                fixed = self.extract_first_match(phrase[i:])
-                row.append(fixed)
-                i = phrase.index(fixed) + len(fixed) + 1
+        for phrase in tabula_line:
+            if phrase == "":
+                row.append(phrase)
+            else:
+                i = 0  # holds index of the next place to search for a token
+                while i < len(phrase):
+                    le = len(phrase[i:])
+                    fixed = self.extract_first_match(phrase[i:])
+                    print(phrase, fixed, i)
+                    if not fixed == '':
+                        row.append(fixed)
+                    i = phrase.index(fixed) + len(fixed) + 1  # points to the beginning of next token in phrase
+                    if i < le:
+                        phrase = phrase[i:]  # make next token first
+                    else:
+                        break
+                    i = 0
+
         return row
