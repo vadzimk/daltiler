@@ -2,6 +2,8 @@ import TEMPLATE
 
 from modules.PdfPage import PdfPage
 import PDF_CONST as PFC
+from modules import PROJ_CONST as PR
+import pandas
 
 
 class PdfDoc:
@@ -19,10 +21,15 @@ class PdfDoc:
         # construct cumulative dictionary
         for key in PFC.PRODUCT_TABLE_FIELDS:
             self.__all_pages_product_dict[key] = []
-            list_of_value_lists = [dict[key] for dict in self.__list_of_all_product_dicts]
-            for alist in list_of_value_lists:
-                for item in alist:
-                    self.__all_pages_product_dict[key] += item
+            for item in self.__list_of_all_product_dicts:
+                self.__all_pages_product_dict[key] += item[key]
+
+        print(f"cumulative dict: {self.__list_of_all_product_dicts}")
+
+    def export_cumulative_dict(self):
+        df = pandas.DataFrame(self.__all_pages_product_dict)
+        df.to_csv('{}product_table.csv'.format(PR.DIR_PROJECT))
+
 
 
 class ExcelTable:
