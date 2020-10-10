@@ -10,35 +10,35 @@ class PdfLine:
 
     def __init__(self, tabula_csv_reader_list_line, page_data_set, color_table_below):
         """ @:param page_data_set for better detection of tokens"""
-        self._row = tabula_csv_reader_list_line  # list corresponding to a line in the csv_reader file
+        self._tablula_line = tabula_csv_reader_list_line
+        self._row = tabula_csv_reader_list_line  # treat row here
         self._page_data_set = page_data_set
         self._color_table_below = color_table_below
         self._row_len = len(self._row)  # number of items in the list representing the row
         self._num_blanks = self.count_blanks()
-        self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
+        # self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
         self._is_color_table_row = self.is_color_table_row()
         self._is_product_table_row = self.is_product_table_row()
 
-
     def contains_series(self):
         """ detects series name in the row"""
-        return PFC.DETECT_SERIES_SET.issubset(set(self._row))
+        return PFC.DETECT_SERIES_SET.issubset(set(self._tablula_line))
 
     def find_series_name(self):
         """ if row contains series then returns it otherwise returns None """
         name = None
         if self.contains_series():
-            if "#" in self._row[0]:
-                name = self._row[0].replace('#', '') + " " + self._row[1]
-            elif "#" in self._row[1]:
-                name = self._row[0] + " " + self._row[2]
+            if "#" in self._tablula_line[0]:
+                name = self._tablula_line[0].replace('#', '') + " " + self._tablula_line[1]
+            elif "#" in self._tablula_line[1]:
+                name = self._tablula_line[0] + " " + self._tablula_line[2]
             name = " ".join(name.split())  # remove multiple spaces
         return name
 
     def count_blanks(self):
         """ counts number of blanks in a given row"""
         count = 0
-        for token in self._row:
+        for token in self._tablula_line:
             if PdfLine.token_is_blank(token):
                 count += 1
         return count
@@ -47,7 +47,8 @@ class PdfLine:
         """if length of row is 1 and the 0th item is not empty string
          then it contains group name"""
         contains = False
-        if self._num_blanks == self._row_len - 1 and not PdfLine.token_is_blank(self._row[0]):
+        if self._num_blanks == self._row_len - 1 and not PdfLine.token_is_blank(
+                self._row[0]) and not "COLORS" in self._row:
             contains = True
         return contains
 
@@ -58,29 +59,17 @@ class PdfLine:
         return group_name
 
     def contains_subgroup(self):
-        # contains = False
-        # # if row has 7 columns and at least 5 of them are not blank (for now)
-        # if self._row_len == max(PFC.ITEM_ROW_LEN) and self._row_len - self._num_blanks in PFC.ITEM_ROW_LEN:
-        #     contains = True
-        # return contains
         return self._is_product_table_row
 
     def find_subgroup(self):
         subgroup_name = None
         if self.contains_subgroup():
-            if not self._color_table_below:
-                SUBGROUP_INDEX = 2
+            if len(self._row) > 6:
+                SUBGROUP_INDEX = 2 #3
             else:
-                SUBGROUP_INDEX = 2 # some rows 3
+                SUBGROUP_INDEX = 2
             subgroup_name = self._row[SUBGROUP_INDEX]
         return subgroup_name
-
-    def all_cells_filled(self):
-        all_filled = False
-        # if row has 7 columns and at least 6 of them are not blank (for now)
-        if self._row_len == max(PFC.ITEM_ROW_LEN) and self._row_len - self._num_blanks == 6:
-            all_filled = True
-        return all_filled
 
     def contains_item_size(self):
         return self._is_product_table_row
@@ -102,17 +91,14 @@ class PdfLine:
         if not self._color_table_below:
             vendor_code_index = PFC.VENDOR_CODE_INDEX
         else:
-            vendor_code_index = 0 # is 2 in some pages
+            vendor_code_index = 0  # is 2 in some pages
         if self.contains_vendor_code():
             if '*' in self._row[vendor_code_index]:
                 code = self._row[vendor_code_index].split(' ')[-2]
             else:
 
                 code = self._row[vendor_code_index].split(' ')[-1]  # the last item of the returned by split list
-        print(self.contains_item_size(), self._row_len, self.contains_vendor_code(), code, vendor_code_index, self._row[vendor_code_index], self._row)
         return code
-
-
 
     def contains_color(self):
         contains = False
@@ -158,13 +144,35 @@ class PdfLine:
         """returns true if the row from midfile to be output in the outfile"""
         row_set = set(self._row)
         is_valid = False
-        if self._row_len - self._num_blanks in PFC.ITEM_ROW_LEN and PFC.DETECT_SERIES_SET.isdisjoint(
+        if not self.contains_series() and not self.contains_group() and PFC.DETECT_SERIES_SET.isdisjoint(
                 row_set) and PFC.EMPTY_LINE_FLAGS.isdisjoint(
             row_set):
             is_valid = True
+            print(self._row)
         return is_valid
 
     def is_color_table_row(self):
         is_ctr = False
-        is_ctr = self._color_table_below and (self._row_len == 2 or self._row_len == 3) and self._row_len - self._num_blanks == 2
+        is_ctr = self._color_table_below and (
+                self._row_len == 2 or self._row_len == 3) and self._row_len - self._num_blanks == 2
         return is_ctr
+
+    def extract_first_match(self, phrase):
+        """ @:param phrase is a string with spaces that needs to be broken in several tokens that are present in page_data_set
+        @:returns recursively smaller phrase that is either empty string or contained in the page_data_set """
+        if len(phrase) == 0:
+            return phrase
+        elif phrase in self._page_data_set:
+            return phrase
+        else:
+            return self.extract_first_match(" ".join(phrase.split()[:-1]))  # remove the last word from the token
+
+    def treat_row(self):
+        row = []
+        for phrase in self._tablula_line:
+            i = 0  # holds index of the next place to search for a token
+            while i < len(phrase[i:]):
+                fixed = self.extract_first_match(phrase[i:])
+                row.append(fixed)
+                i = phrase.index(fixed) + len(fixed) + 1
+        return row

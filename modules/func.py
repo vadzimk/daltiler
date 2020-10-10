@@ -33,7 +33,8 @@ class MyHtmlParser(HTMLParser):
         self.page_data_set = set()  # creates a new empty set to  hold data items from the html
 
     def handle_data(self, data):
-        self.page_data_set.add(data)  # adds data item to the set for use in error checking algorithm
+        if "font-family" not in data:
+            self.page_data_set.add(data)  # adds data item to the set for use in error checking algorithm
 
 def convert_to_html(infilename, first, last):
     # run pdftohtml https://www.xpdfreader.com/pdftohtml-man.html

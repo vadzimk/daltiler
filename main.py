@@ -1,8 +1,7 @@
 import sys
 
-from modules.classes import *
+from modules.PdfDoc import PdfDoc
 from modules.func import *
-import subprocess
 
 cleanup()
 create_project()

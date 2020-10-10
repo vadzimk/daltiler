@@ -35,6 +35,7 @@ class PdfPage:
         self._page_data_set = html_parser.page_data_set
         print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing
 
+
         self._contains_color_table = self.contains_color_table()
 
         # constructs list of PdfLine objects

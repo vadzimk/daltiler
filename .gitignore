@@ -14,6 +14,7 @@ archive/
 */__pycache__/
 
 tests.py
+*/test_fn.py
 
 xpdf/
 project/*
