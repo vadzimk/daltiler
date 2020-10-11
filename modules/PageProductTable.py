@@ -9,7 +9,7 @@ class PageProductTable:
     """ contains products in a dictionary """
 
     def __init__(self, lines, page_number, colors):
-        self.pagenumber = page_number
+        self._pagenumber = page_number
         self.lines = lines
         self.colors = colors
 
@@ -75,7 +75,7 @@ class PageProductTable:
         frame = []
         for line in self.lines:
             frame.append(line._row)
-        with open("{}treated{}.csv".format(PR.DIR_TREATED_ROWS, self.pagenumber), "w", newline='') as f:
+        with open("{}treated{}.csv".format(PR.DIR_TREATED_ROWS, self._pagenumber), "w", newline='') as f:
             wr = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
             wr.writerows(frame)
 
