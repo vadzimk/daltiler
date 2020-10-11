@@ -23,7 +23,7 @@ class PdfDoc:
             for item in self.__list_of_all_product_dicts:
                 self.__all_pages_product_dict[key] += item[key]
 
-        print(f"cumulative dict: {self.__list_of_all_product_dicts}")
+        # print(f"cumulative dict: {self.__list_of_all_product_dicts}")
 
     def export_cumulative_dict(self):
         df = pandas.DataFrame(self.__all_pages_product_dict)

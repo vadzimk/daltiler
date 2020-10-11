@@ -69,16 +69,21 @@ class PdfLine:
     def find_subgroup(self):
         subgroup_name = None
         if self.contains_subgroup():
-            if len(self._row)==6:
-                index = 2
+            index = 0
+            if (not self._row[0] and not self._row[1] and len(self._row)>=7) or (len(self._row)==6 or len(self._row)==5):
+                # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
+                i = 0 # start looking from index
+            elif not self._row[1]:
+                i = 3 # row contains values of size and vendor code befroe the subgroup and row[1] is empty
             else:
-                index = 2
-                i = 2
-                while i <len(self._row):
-                    if self._row[i]:
-                        index = i
-                        break
-                    i+=1
+                i = 2 # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
+
+            # print("startig i:", i, self._row[i], self._row)
+            while i <len(self._row):
+                if self._row[i]:
+                    index = i
+                    break
+                i+=1
             subgroup_name = self._row[index]
         return subgroup_name
 

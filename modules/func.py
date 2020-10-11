@@ -24,9 +24,9 @@ def create_project():
 
 
     if os.path.exists(PR.DIR_PROJECT) and os.path.isdir(PR.DIR_PROJECT):
-        print(f"New project directory {PR.DIR_PROJECT} created.")
+        print(f"New project directory {PR.DIR_PROJECT} created")
     else:
-        print(f"New project directory {PR.DIR_PROJECT} creation FAILED.")
+        print(f"New project directory {PR.DIR_PROJECT} creation FAILED")
 
 
 class MyHtmlParser(HTMLParser):
@@ -86,18 +86,27 @@ def ask_for_filename(args):
             print(f"{infilename} does not exist.\n ")
     return infilename
 
-def ask_for_n_pages(num):
+def ask_for_n_pages(total, start):
     n = None
-    ans = input("How many pages to process:").upper()
-    if ans == "ALL":
-        n = "ALL"
-    if ans.isdigit():
-        n = int(ans)
+    while True:
+        ans = input("How many pages to process:").upper()
+        if ans == "ALL":
+            n = "ALL"
+            break
+        elif ans.isdigit() and (int(ans) + start - 1 <= total):
+            n = int(ans)
+            break
+        else:
+            print(f"Max number: {total-start+1}")
     return n
 
-def ask_for_starting_page():
+def ask_for_starting_page(total_pages):
     p = None
-    ans = input(f"Enter the starting page number:")
-    if ans.isdigit():
-        p = int(ans)
+    while True:
+        ans = input(f"Enter the starting page number:")
+        if ans.isdigit() and int(ans)<=total_pages:
+            p = int(ans)
+            break
+        else:
+            print(f"Invalid number")
     return p

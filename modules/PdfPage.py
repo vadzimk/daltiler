@@ -35,10 +35,10 @@ class PdfPage:
         self.html_page_data_set = html_parser.page_data_set
         self.html_page_data_list = html_parser.page_data_list
 
-        print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing+
-        print(f"Html data list:")
-        for word in html_parser.page_data_list:
-            print(word)
+        # print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing+
+        # print(f"Html data list:")
+        # for word in html_parser.page_data_list:
+        #     print(word)
 
         self._contains_color_table = self.contains_color_table()
 
@@ -53,9 +53,9 @@ class PdfPage:
             else:
                 self._color_list = self.extract_color_list_from_html()
 
-        print(
-            f"contains color_table: {self._contains_color_table} tabula detected it {self.tabula_detected_color_table()}")
-        print("color_list: ", self._color_list)
+        # print(
+        #     f"contains color_table: {self._contains_color_table} tabula detected it {self.tabula_detected_color_table()}")
+        # print("color_list: ", self._color_list)
 
         self._product_table = PageProductTable(self._pdf_line_list, pagenumber, self._color_list)
 
