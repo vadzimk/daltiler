@@ -66,24 +66,28 @@ class PdfLine:
     def contains_subgroup(self):
         return self._is_product_table_row
 
+    def subgoup_index(self):
+        index = 0
+        if (not self._row[0] and not self._row[1] and len(self._row) >= 7) or (
+                len(self._row) == 6 or len(self._row) == 5):
+            # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
+            i = 0  # start looking from index
+        elif not self._row[1]:
+            i = 3  # row contains values of size and vendor code befroe the subgroup and row[1] is empty
+        else:
+            i = 2  # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
+
+        while i < len(self._row):
+            if self._row[i]:
+                index = i
+                break
+            i += 1
+        return index
+
     def find_subgroup(self):
         subgroup_name = None
         if self.contains_subgroup():
-            index = 0
-            if (not self._row[0] and not self._row[1] and len(self._row)>=7) or (len(self._row)==6 or len(self._row)==5):
-                # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
-                i = 0 # start looking from index
-            elif not self._row[1]:
-                i = 3 # row contains values of size and vendor code befroe the subgroup and row[1] is empty
-            else:
-                i = 2 # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
-
-            # print("startig i:", i, self._row[i], self._row)
-            while i <len(self._row):
-                if self._row[i]:
-                    index = i
-                    break
-                i+=1
+            index = self.subgoup_index()
             subgroup_name = self._row[index]
         return subgroup_name
 
@@ -102,24 +106,39 @@ class PdfLine:
         # return self.all_cells_filled()
         return self._is_product_table_row
 
+    def vendor_code_index(self):
+        index = 0
+        if (not self._row[0] and not self._row[1] and len(self._row) >= 7) or (
+                len(self._row) == 6 or len(self._row) == 5):
+            # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
+            return None
+        elif not self._row[1]:
+            i = 2  # row contains values of size and vendor code befroe the subgroup and row[1] is empty
+        else:
+            i = 1  # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
+
+        while i < len(self._row):
+            if self._row[i]:
+                index = i
+                break
+            i += 1
+        return index
+
+
     def find_vendor_code(self):
         code = None
         if self.contains_vendor_code():
-            if self._row[1]:
-                vendor_code_index = 1
+            index = self.vendor_code_index()
+            if index == None:
+                return code
+            if '*' in self._row[index]:
+                code = self._row[index].split(' ')[-2]
             else:
-                vendor_code_index = 2
-
-            if '*' in self._row[vendor_code_index]:
-                code = self._row[vendor_code_index].split(' ')[-2]
-            else:
-
-                code = self._row[vendor_code_index].split(' ')[-1]  # the last item of the returned by split list
+                code = self._row[index].split(' ')[-1]  # the last item of the returned by split list
         return code
 
     def contains_color(self):
         contains = False
-
         if not self._color_table_below and self._is_product_table_row:
             contains = True
         elif self._color_table_below and self._is_product_table_row:
@@ -128,10 +147,22 @@ class PdfLine:
             contains = True
         return contains
 
+    def color_index(self):  # finish this
+        index = None
+        i = self.subgoup_index()+1 # start from index after subgroup
+
+        while i < len(self._row):
+            if self._row[i]:
+                index = i
+                break
+            i += 1
+        return index
+
     def find_item_color(self):
         color = None
         if self.contains_color() and self._is_product_table_row:
-            color = self._row[3]
+            index = self.color_index()
+            color = self._row[index]
         elif self.contains_color() and self._is_color_table_row:
             color = ' '.join(self._row).strip()
         return color
