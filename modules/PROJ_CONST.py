@@ -5,3 +5,4 @@ DIR_TREATED_ROWS = './project/treatedrows/'
 DIR_XPDF = './project/html/'
 
 OUTPUTXLS = 'output.xlsx'
+

@@ -69,12 +69,17 @@ class PdfLine:
     def find_subgroup(self):
         subgroup_name = None
         if self.contains_subgroup():
-            if len(self._row[1]):  # is no empty
-                SUBGROUP_INDEX = 2
-            else: # is empty row[1}
-                SUBGROUP_INDEX = 3
-
-            subgroup_name = self._row[SUBGROUP_INDEX]
+            if len(self._row)==6:
+                index = 2
+            else:
+                index = 2
+                i = 2
+                while i <len(self._row):
+                    if self._row[i]:
+                        index = i
+                        break
+                    i+=1
+            subgroup_name = self._row[index]
         return subgroup_name
 
     def contains_item_size(self):
