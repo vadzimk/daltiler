@@ -16,7 +16,7 @@ class PdfPage:
         print("page:", pagenumber)
         self.midfilename = '{}tabulated_{}.csv'.format(PR.DIR_TABULATED_CSV, pagenumber)
         self.list_of_csv_rows = None  # contain list of rows from the csv file obtained from tabula
-        self._page_data_set = set()
+        self.html_page_data_set = set()
         # read the one page from pdf file with tabula
         tabula.convert_into(infilename, self.midfilename, output_format='csv', pages=pagenumber, stream=True)
 
@@ -32,27 +32,77 @@ class PdfPage:
             data = file.read().replace('\n', '')
             html_parser.feed(data)
 
-        self._page_data_set = html_parser.page_data_set
-        print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing
+        self.html_page_data_set = html_parser.page_data_set
+        self.html_page_data_list = html_parser.page_data_list
 
+        print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing+
+        print(f"Html data list:")
+        for word in html_parser.page_data_list:
+            print(word)
 
         self._contains_color_table = self.contains_color_table()
 
         # constructs list of PdfLine objects
-        self._pdf_line_list = [PdfLine(line, self._page_data_set, self._contains_color_table) for line in
+        self._pdf_line_list = [PdfLine(line, self.html_page_data_set, self._contains_color_table) for line in
                                self.list_of_csv_rows]
 
-        # if color_table below, extract colors from it
         self._color_list = None
         if self._contains_color_table:
-            self._color_list = [line.find_item_color() for line in self._pdf_line_list if
-                                line.contains_color()]  # list comprehension with if condition at the end(if-else goes at the front)
+            if self.tabula_detected_color_table():
+                self._color_list = self.extract_color_list_from_tabula()
+            else:
+                self._color_list = self.extract_color_list_from_html()
+
+        print(
+            f"contains color_table: {self._contains_color_table} tabula detected it {self.tabula_detected_color_table()}")
+        print("color_list: ", self._color_list)
 
         self._product_table = PageProductTable(self._pdf_line_list, pagenumber, self._color_list)
 
+    def extract_color_list_from_tabula(self):
+        """if color_table below, extract colors from it"""
+        color_list = []
+        color_table_header_encountered = False
+        for line in self._pdf_line_list:
+            if line._is_color_table_header:
+                color_table_header_encountered = True
+            if line.contains_color() and color_table_header_encountered:
+                color_list.append(line.find_item_color())
+        return color_list
+
+    def extract_color_list_from_html(self):
+        """ color code contains digit can use that too"""
+        color_list = []
+        color_table_header_encountered = False
+        index = 0
+        for item in self.html_page_data_list:
+            if "COLORS" in item:
+                color_table_header_encountered = True
+                continue
+            if "Customer" in item:
+                break
+            if color_table_header_encountered:
+                if index % 2 == 0:
+                    word = ""
+                    word += " " + item
+                    index += 1
+                else:
+                    word += " " + item
+                    color_list.append(" ".join(word.split()))
+                    index += 1
+        return color_list
+
     def contains_color_table(self):
         contains = False
-        for token in self._page_data_set:
+        for token in self.html_page_data_set:
             if "COLORS" in token:
                 contains = True
         return contains
+
+    def tabula_detected_color_table(self):
+        detected = False
+        for line in self._pdf_line_list:
+            for item in line._row:
+                if "COLORS" in item:
+                    detected = True
+        return detected

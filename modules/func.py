@@ -19,6 +19,8 @@ def create_project():
     Path(PR.DIR_PROJECT).mkdir(parents=False, exist_ok=True)
     Path(PR.DIR_TABULATED_CSV).mkdir(parents=False, exist_ok=True)
     Path(PR.DIR_PRODUCT_TABLES).mkdir(parents=False, exist_ok=True)
+    Path(PR.DIR_TREATED_ROWS).mkdir(parents=False, exist_ok=True)
+
 
 
     if os.path.exists(PR.DIR_PROJECT) and os.path.isdir(PR.DIR_PROJECT):
@@ -31,10 +33,13 @@ class MyHtmlParser(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.page_data_set = set()  # creates a new empty set to  hold data items from the html
+        self.page_data_list=[]
 
     def handle_data(self, data):
         if "font-family" not in data:
-            self.page_data_set.add(data)  # adds data item to the set for use in error checking algorithm
+            data = " ".join(data.split())
+            self.page_data_set.add(data)
+            self.page_data_list.append(data)
 
 def convert_to_html(infilename, first, last):
     # run pdftohtml https://www.xpdfreader.com/pdftohtml-man.html
@@ -83,7 +88,9 @@ def ask_for_filename(args):
 
 def ask_for_n_pages(num):
     n = None
-    ans = input("How many pages to process:")
+    ans = input("How many pages to process:").upper()
+    if ans == "ALL":
+        n = "ALL"
     if ans.isdigit():
         n = int(ans)
     return n

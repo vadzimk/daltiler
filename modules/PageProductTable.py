@@ -2,12 +2,14 @@ import pandas
 
 import PDF_CONST as PFC
 from modules import PROJ_CONST as PR
+import csv
 
 
 class PageProductTable:
     """ contains products in a dictionary """
 
     def __init__(self, lines, page_number, colors):
+        self.pagenumber = page_number
         self.lines = lines
         self.colors = colors
 
@@ -29,6 +31,10 @@ class PageProductTable:
         # export product table as csv
         df = pandas.DataFrame(self.__products)
         df.to_csv('{}data_frame{}.csv'.format(PR.DIR_PRODUCT_TABLES, page_number), index=False)
+
+        # export treated rows as csv
+        self.export_treated_rows()
+
 
     def build_table(self):
         """ sees what fields are detected by the PdfLine and builds product table"""
@@ -63,3 +69,14 @@ class PageProductTable:
     def get_products(self):
         """@:returns the dictionary of products representing product table of the page"""
         return self.__products
+
+    def export_treated_rows(self):
+        """ export treated rows as csv"""
+        frame = []
+        for line in self.lines:
+            frame.append(line._row)
+        with open("{}treated{}.csv".format(PR.DIR_TREATED_ROWS, self.pagenumber), "w", newline='') as f:
+            wr = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
+            wr.writerows(frame)
+
+

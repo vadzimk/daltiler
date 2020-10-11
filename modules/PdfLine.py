@@ -15,12 +15,14 @@ class PdfLine:
         self._row = self.treat_row()
 
         self._color_table_below = color_table_below
+
         self._row_len = len(self._row)  # number of items in the list representing the row
         self._num_blanks = self.count_blanks()
         # self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
         self._is_color_table_header = self.is_color_table_header()
         self._is_color_table_row = self.is_color_table_row()
         self._is_product_table_row = self.is_product_table_row()
+
 
 
     def contains_series(self):
@@ -67,11 +69,11 @@ class PdfLine:
     def find_subgroup(self):
         subgroup_name = None
         if self.contains_subgroup():
-            if len(self._row) > 6:
-                SUBGROUP_INDEX = 2 #2
-            else:
+            if len(self._row[1]):  # is no empty
                 SUBGROUP_INDEX = 2
-                print("fsg", self._row)
+            else: # is empty row[1}
+                SUBGROUP_INDEX = 3
+
             subgroup_name = self._row[SUBGROUP_INDEX]
         return subgroup_name
 
@@ -92,11 +94,12 @@ class PdfLine:
 
     def find_vendor_code(self):
         code = None
-        if not self._color_table_below:
-            vendor_code_index = PFC.VENDOR_CODE_INDEX
-        else:
-            vendor_code_index = 0  # is 2 in some pages
         if self.contains_vendor_code():
+            if self._row[1]:
+                vendor_code_index = 1
+            else:
+                vendor_code_index = 2
+
             if '*' in self._row[vendor_code_index]:
                 code = self._row[vendor_code_index].split(' ')[-2]
             else:
@@ -111,7 +114,7 @@ class PdfLine:
             contains = True
         elif self._color_table_below and self._is_product_table_row:
             contains = False
-        elif self._color_table_below and self._is_color_table_row:  # this is a color table row and it contains color if _row_len==3
+        elif self._color_table_below and self._is_color_table_row and not self._is_color_table_header:  # this is a color table row and it contains color if _row_len==3
             contains = True
         return contains
 
@@ -152,7 +155,6 @@ class PdfLine:
                 row_set) and PFC.EMPTY_LINE_FLAGS.isdisjoint(
             row_set):
             is_valid = True
-            print(self._row)
         return is_valid
 
     def is_color_table_header(self):
@@ -164,8 +166,7 @@ class PdfLine:
 
     def is_color_table_row(self):
         is_ctr = False
-        is_ctr = self._color_table_below and (
-                self._row_len == 2 or self._row_len == 3) and self._row_len - self._num_blanks == 2
+        is_ctr = self._color_table_below and self._row_len <= 3 and self._row_len - self._num_blanks <= 2 and not self._is_color_table_header
         return is_ctr
 
     def extract_first_match(self, phrase):
@@ -182,7 +183,6 @@ class PdfLine:
         """ compares token in row to the html dataset and separates string into items that are present in the html dataset"""
         tabula_line = []
         for token in self._tablula_line:
-            print(" ".join(token.split()))
             tabula_line.append(" ".join(token.split()))
 
         row = []
@@ -194,7 +194,7 @@ class PdfLine:
                 while i < len(phrase):
                     le = len(phrase[i:])
                     fixed = self.extract_first_match(phrase[i:])
-                    print(phrase, fixed, i)
+
                     if not fixed == '':
                         row.append(fixed)
                     i = phrase.index(fixed) + len(fixed) + 1  # points to the beginning of next token in phrase
