@@ -110,14 +110,15 @@ class PdfLine:
 
     def vendor_code_index(self):
         index = 0
-        if (not self._row[0] and not self._row[1] and len(self._row) >= 7) or (
-                len(self._row) == 6 or len(self._row) == 5):
-            # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
-            return None
-        elif not self._row[1]:
-            i = 2  # row contains values of size and vendor code befroe the subgroup and row[1] is empty
-        else:
-            i = 1  # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
+
+        if not self._color_table_below:
+            if (not self._row[0] and not self._row[1] and len(self._row) >= 7):
+                # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
+                return None
+            else:
+                i = 1
+        else:  # there is color table below
+                i = 1
 
         while i < len(self._row):
             if self._row[i]:
