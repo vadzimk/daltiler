@@ -40,7 +40,7 @@ end_time = time.time()
 hours, rem = divmod(end_time-start_time, 3600)
 minutes, seconds = divmod(rem, 60)
 print(f"Task finished.\n"
-      f"Time spent: {minutes:.0f} min {seconds:.0f} sec\n"
+      f"Time spent: {minutes:.0f} min {seconds:.0f} sec\1n"
       f"See {PR.DIR_PROJECT}product_table.csv")
 
 

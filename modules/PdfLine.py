@@ -22,9 +22,6 @@ class PdfLine:
         self._is_color_table_header = self.is_color_table_header()
         self._is_color_table_row = self.is_color_table_row()
         self._is_product_table_row = self.is_product_table_row()
-        print("contains_color", self.contains_color())
-
-
 
     def contains_series(self):
         """ detects series name in the row"""
@@ -79,7 +76,7 @@ class PdfLine:
         else:  # there is color table below
             if self._row[1]:
                 i = 2  # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
-            else: # row[1] is empty
+            else:  # row[1] is empty
                 i = 3  # row contains values of size and vendor code befroe the subgroup and row[1] is empty
 
         while i < len(self._row):
@@ -129,7 +126,6 @@ class PdfLine:
             i += 1
         return index
 
-
     def find_vendor_code(self):
         code = None
         if self.contains_vendor_code():
@@ -154,7 +150,7 @@ class PdfLine:
 
     def color_index(self):  # finish this
         index = None
-        i = self.subgoup_index()+1 # start from index after subgroup
+        i = self.subgoup_index() + 1  # start from index after subgroup
 
         while i < len(self._row):
             if self._row[i]:

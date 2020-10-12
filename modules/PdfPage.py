@@ -2,7 +2,6 @@ import csv
 
 import tabula
 
-
 from modules.PageProductTable import PageProductTable
 from modules import PROJ_CONST as PR
 from modules.PdfLine import PdfLine
@@ -62,7 +61,8 @@ class PdfPage:
         # print("color_list", self._color_list)
         self.extract_color_list_with_tabula_template()
 
-        self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, self._color_list)
+        # moved creation of product tables to the PdfDoc class
+        self._product_table = None
 
     def extract_color_list_from_pdf_line_list(self):
         """if color_table below, extract colors from it"""
@@ -115,7 +115,8 @@ class PdfPage:
 
     def extract_color_list_with_tabula_template(self):
         # https://tabula-py.readthedocs.io/en/latest/faq.html?highlight=area#how-to-use-area-option
-        df = tabula.read_pdf(input_path=self.infilename, pandas_options={'header': None}, output_format="dataframe", pages=self.pagenumber,
+        df = tabula.read_pdf(input_path=self.infilename, pandas_options={'header': None}, output_format="dataframe",
+                             pages=self.pagenumber,
                              lattice=True, area=(31.591, 17.128, 749.450, 591.110))
         df_list = []
         for item in df:
@@ -125,7 +126,7 @@ class PdfPage:
         color_list = []
         color_table_head_encountered = False
         for line in df_list:
-            line = " ".join(map(str,line))
+            line = " ".join(map(str, line))
             # print("line:", line)
             if "COLORS" in line:
                 color_table_head_encountered = True
@@ -142,6 +143,8 @@ class PdfPage:
                 contains = True
         return contains
 
-
-
-
+    def create_product_table(self, external_color_list=None):
+        if self.page_contains_color_info() or len(self._color_list) > 0:
+            self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, self._color_list)
+        else:
+            self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, external_color_list)

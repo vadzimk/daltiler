@@ -5,7 +5,7 @@ DIR_TREATED_ROWS = './project/treatedrows/'
 DIR_XPDF = './project/html/'
 
 
-43
+
 
 OUTPUTXLS = 'output.xlsx'
 
