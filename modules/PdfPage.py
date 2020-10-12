@@ -50,6 +50,7 @@ class PdfPage:
         self._pdf_line_list = [PdfLine(line, self.html_page_data_set, self._contains_color_table) for line in
                                self.list_of_csv_rows]
 
+        self._page_contains_color_info = self.page_contains_color_info()
         self._color_list = None
         if self._contains_color_table:
             if self.tabula_detected_color_table():
@@ -133,6 +134,13 @@ class PdfPage:
             if color_table_head_encountered:
                 color_list.append(" ".join(line.split()))
         return color_list
+
+    def page_contains_color_info(self):
+        contains = False
+        for line in self._pdf_line_list:
+            if line.contains_color():
+                contains = True
+        return contains
 
 
 
