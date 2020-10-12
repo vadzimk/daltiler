@@ -2,6 +2,7 @@ import csv
 
 import tabula
 
+
 from modules.PageProductTable import PageProductTable
 from modules import PROJ_CONST as PR
 from modules.PdfLine import PdfLine
@@ -13,12 +14,15 @@ class PdfPage:
     """ converts Pdf page to csv, creates a list of PdfLine objects for each line and passes it to PdfProductTable and PdfColorTable"""
 
     def __init__(self, infilename, pagenumber):
-        print("page:", pagenumber)
-        self.midfilename = '{}tabulated_{}.csv'.format(PR.DIR_TABULATED_CSV, pagenumber)
+        self.infilename = infilename
+        self.pagenumber = pagenumber
+        print("page:", self.pagenumber)
+        self.midfilename = '{}tabulated_{}.csv'.format(PR.DIR_TABULATED_CSV, self.pagenumber)
         self.list_of_csv_rows = None  # contain list of rows from the csv file obtained from tabula
         self.html_page_data_set = set()
+
         # read the one page from pdf file with tabula
-        tabula.convert_into(infilename, self.midfilename, output_format='csv', pages=pagenumber, stream=True)
+        tabula.convert_into(self.infilename, self.midfilename, output_format='csv', pages=self.pagenumber, stream=True)
 
         # read the csv file call it csvfile
         with open(self.midfilename, newline='') as csvfile:
@@ -28,7 +32,7 @@ class PdfPage:
         #  get data from html pages
         html_parser = MyHtmlParser()
 
-        with open('{}page{}.html'.format(PR.DIR_XPDF, pagenumber), 'r') as file:
+        with open('{}page{}.html'.format(PR.DIR_XPDF, self.pagenumber), 'r') as file:
             data = file.read().replace('\n', '')
             html_parser.feed(data)
 
@@ -36,7 +40,7 @@ class PdfPage:
         self.html_page_data_list = html_parser.page_data_list
 
         # print(f"Html data set: {html_parser.page_data_set}")  # output the pagedata_set for testing+
-        # print(f"Html data list:")
+        # print(f"Html data list: {self.html_page_data_list}")
         # for word in html_parser.page_data_list:
         #     print(word)
 
@@ -49,17 +53,17 @@ class PdfPage:
         self._color_list = None
         if self._contains_color_table:
             if self.tabula_detected_color_table():
-                self._color_list = self.extract_color_list_from_tabula()
+                self._color_list = self.extract_color_list_from_pdf_line_list()
             else:
-                self._color_list = self.extract_color_list_from_html()
+                self._color_list = self.extract_color_list_with_tabula_template()
 
-        # print(
-        #     f"contains color_table: {self._contains_color_table} tabula detected it {self.tabula_detected_color_table()}")
-        # print("color_list: ", self._color_list)
+        # print(f"contains color_table: {self._contains_color_table} tabula detected it {self.tabula_detected_color_table()}")
+        # print("color_list", self._color_list)
+        self.extract_color_list_with_tabula_template()
 
-        self._product_table = PageProductTable(self._pdf_line_list, pagenumber, self._color_list)
+        self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, self._color_list)
 
-    def extract_color_list_from_tabula(self):
+    def extract_color_list_from_pdf_line_list(self):
         """if color_table below, extract colors from it"""
         color_list = []
         color_table_header_encountered = False
@@ -71,15 +75,16 @@ class PdfPage:
         return color_list
 
     def extract_color_list_from_html(self):
-        """ color code contains digit can use that too"""
+        """ sentinel value is "Customer"  or "IMPORTANT NOTICE"""
         color_list = []
         color_table_header_encountered = False
         index = 0
         for item in self.html_page_data_list:
+            # print("data:", item)
             if "COLORS" in item:
                 color_table_header_encountered = True
                 continue
-            if "Customer" in item:
+            if "Customer" in item or "IMPORTANT NOTICE":
                 break
             if color_table_header_encountered:
                 if index % 2 == 0:
@@ -106,3 +111,29 @@ class PdfPage:
                 if "COLORS" in item:
                     detected = True
         return detected
+
+    def extract_color_list_with_tabula_template(self):
+        # https://tabula-py.readthedocs.io/en/latest/faq.html?highlight=area#how-to-use-area-option
+        df = tabula.read_pdf(input_path=self.infilename, pandas_options={'header': None}, output_format="dataframe", pages=self.pagenumber,
+                             lattice=True, area=(31.591, 17.128, 749.450, 591.110))
+        df_list = []
+        for item in df:
+            item = item.fillna('')
+            df_list += item.values.tolist()
+
+        color_list = []
+        color_table_head_encountered = False
+        for line in df_list:
+            line = " ".join(map(str,line))
+            # print("line:", line)
+            if "COLORS" in line:
+                color_table_head_encountered = True
+                # print(color_table_head_encountered)
+                continue
+            if color_table_head_encountered:
+                color_list.append(" ".join(line.split()))
+        return color_list
+
+
+
+
