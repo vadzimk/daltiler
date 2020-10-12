@@ -144,7 +144,7 @@ class PdfPage:
         return contains
 
     def create_product_table(self, external_color_list=None):
-        if self.page_contains_color_info() or len(self._color_list) > 0:
+        if self.page_contains_color_info() or self._color_list:
             self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, self._color_list)
         else:
             self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, external_color_list)
