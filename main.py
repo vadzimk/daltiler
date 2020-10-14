@@ -10,7 +10,7 @@ args = sys.argv  # get the list of arguments
 if len(args) == 2:
     infilename = args[1]
 else:
-    infilename = ask_for_filename(args) or 'test315.pdf'
+    infilename = ask_for_filename(args) or 'Deltile.pdf'
 print(f"Chosen file: {infilename}")
 
 infilename_n_pages = determine_n_pages(infilename)

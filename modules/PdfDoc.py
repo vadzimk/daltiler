@@ -12,6 +12,7 @@ class PdfDoc:
         """by default grabs the first page only"""
         self._pages = [PdfPage(in_file_name, pagenumber=i) for i in
                        range(page_start, page_start + n_pages)]  # list of PdfPage objects
+
         for i in range(len(self._pages)-1):
             self._pages[i].create_product_table(self._pages[i+1]._color_list)
         self._pages[len(self._pages)-1].create_product_table()  # ceate last product table with no external color list

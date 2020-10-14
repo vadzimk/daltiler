@@ -45,11 +45,13 @@ class PdfPage:
 
         self._contains_color_table = self.contains_color_table()
 
+
         # constructs list of PdfLine objects
         self._pdf_line_list = [PdfLine(line, self.html_page_data_set, self._contains_color_table) for line in
                                self.list_of_csv_rows]
 
         self._page_contains_color_info = self.page_contains_color_info()
+
         self._color_list = None
         if self._contains_color_table:
             if self.tabula_detected_color_table():
@@ -57,8 +59,6 @@ class PdfPage:
             else:
                 self._color_list = self.extract_color_list_with_tabula_template()
 
-        # print(f"contains color_table: {self._contains_color_table} tabula detected it {self.tabula_detected_color_table()}")
-        # print("color_list", self._color_list)
         self.extract_color_list_with_tabula_template()
 
         # moved creation of product tables to the PdfDoc class
@@ -138,13 +138,24 @@ class PdfPage:
 
     def page_contains_color_info(self):
         contains = False
+        max_len = 0
         for line in self._pdf_line_list:
-            if line.contains_color():
-                contains = True
+            if line._row_len > max_len:
+                max_len = line._row_len
+
+        for line in self._pdf_line_list:
+            if line._row_len == max_len:
+                if not line._row[0] and line._is_product_table_row:  # isempty
+                    contains = True
+
         return contains
 
     def create_product_table(self, external_color_list=None):
         if self.page_contains_color_info() or self._color_list:
             self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, self._color_list)
-        else:
+        else:  # page doesn't contin color info in itself
             self._product_table = PageProductTable(self._pdf_line_list, self.pagenumber, external_color_list)
+
+    def read_with_column_coordinates(self):
+        """ provide column coordinates when the whitespace is too small in the page"""
+        pass

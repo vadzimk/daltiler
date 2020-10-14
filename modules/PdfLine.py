@@ -23,6 +23,8 @@ class PdfLine:
         self._is_color_table_row = self.is_color_table_row()
         self._is_product_table_row = self.is_product_table_row()
 
+        # print(len(self._row), self._row)
+
     def contains_series(self):
         """ detects series name in the row"""
         return PFC.DETECT_SERIES_SET.issubset(set(self._tablula_line))
@@ -68,9 +70,11 @@ class PdfLine:
         index = 0
 
         if not self._color_table_below:
-            if (not self._row[0] and not self._row[1] and len(self._row) >= 7):
+            if (not self._row[0] and not self._row[1] and self._row_len > 7) or self._row_len<=7:
                 # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
                 i = 0  # start looking from index
+            elif self._row_len == 7 and self._num_blanks == 1:
+                i = 2
             else:
                 i = 2
         else:  # there is color table below
@@ -78,7 +82,7 @@ class PdfLine:
                 i = 2  # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
             else:  # row[1] is empty
                 i = 3  # row contains values of size and vendor code befroe the subgroup and row[1] is empty
-
+        print(self._color_table_below, i, "sub_index", index, "numblanks", self._num_blanks, "len",self._row_len, self._row)
         while i < len(self._row):
             if self._row[i]:
                 index = i
