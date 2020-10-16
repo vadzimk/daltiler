@@ -7,6 +7,9 @@ VENDOR_CODE_INDEX = 1  # index of the item of the list that contains vendor code
 
 # EXTERNAL DATA
 VENDOR_NAME_CODE = "V006"
+vendor1_name = "V006 DALTILE"
+vendor1_subsidiary = 3
+vendor2_subsidiary = 4
 
 PRODUCT_TABLE_FIELDS = [
     "_pagenumber",

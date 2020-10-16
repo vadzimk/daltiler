@@ -6,6 +6,8 @@ import subprocess
 from html.parser import HTMLParser
 
 from modules import PROJ_CONST as PR
+import pandas
+import csv
 
 
 def cleanup():
@@ -21,8 +23,6 @@ def create_project():
     Path(PR.DIR_PRODUCT_TABLES).mkdir(parents=True, exist_ok=True)
     Path(PR.DIR_TREATED_ROWS).mkdir(parents=True, exist_ok=True)
 
-
-
     if os.path.exists(PR.DIR_PROJECT) and os.path.isdir(PR.DIR_PROJECT):
         print(f"New project directory {PR.DIR_PROJECT} created")
     else:
@@ -33,13 +33,14 @@ class MyHtmlParser(HTMLParser):
     def __init__(self):
         HTMLParser.__init__(self)
         self.page_data_set = set()  # creates a new empty set to  hold data items from the html
-        self.page_data_list=[]
+        self.page_data_list = []
 
     def handle_data(self, data):
         if "font-family" not in data:
             data = " ".join(data.split())
             self.page_data_set.add(data)
             self.page_data_list.append(data)
+
 
 def convert_to_html(infilename, first, last):
     # run pdftohtml https://www.xpdfreader.com/pdftohtml-man.html
@@ -62,6 +63,7 @@ def convert_to_html(infilename, first, last):
 
     return success
 
+
 def determine_n_pages(infilename):
     """determine number of pages in the infile"""
     infilename_n_pages = -1
@@ -74,17 +76,19 @@ def determine_n_pages(infilename):
             infilename_n_pages = item.split()[-1]
     return int(infilename_n_pages)
 
+
 def ask_for_filename(args):
     infilename = None
     while True:
         infilename = input("Enter the name of pdf file:")
         if ".pdf" not in infilename and not len(infilename.split()) == 0:
             infilename += ".pdf"
-        if len(infilename.split()) ==0 or (os.path.exists(infilename) and os.path.isfile(infilename)):
+        if len(infilename.split()) == 0 or (os.path.exists(infilename) and os.path.isfile(infilename)):
             break
         else:
             print(f"{infilename} does not exist.\n ")
     return infilename
+
 
 def ask_for_n_pages(total, start):
     n = None
@@ -97,16 +101,66 @@ def ask_for_n_pages(total, start):
             n = int(ans)
             break
         else:
-            print(f"Max number: {total-start+1}")
+            print(f"Max number: {total - start + 1}")
     return n
+
 
 def ask_for_starting_page(total_pages):
     p = None
     while True:
         ans = input(f"Enter the starting page number:")
-        if ans.isdigit() and int(ans)<=total_pages:
+        if ans.isdigit() and int(ans) <= total_pages:
             p = int(ans)
             break
         else:
             print(f"Invalid number")
     return p
+
+
+# ==================  functions for tf.py  === table filler ==============
+
+
+def read_to_dict(source_path):
+    list_of_csv_rows = None
+    if os.path.exists(source_path) and os.path.isfile(source_path):
+        # read the csv file call it csvfile
+        with open(source_path, newline='') as csvfile:
+            dict_reader_object = csv.DictReader(csvfile, dialect='excel')  # returns reader object that is an iterator
+            list_of_csv_rows = list(dict_reader_object)
+    else:
+        print(f"Not found: {source_path}")
+
+    source_dict = {}  # to contain data from product_table.csv file
+    for key in dict_reader_object.fieldnames:
+        source_dict[key] = []
+        for row in list_of_csv_rows:
+            source_dict[key].append(row[key])
+    return source_dict
+
+
+def export_dict(dictionary, filename):
+    df = pandas.DataFrame(dictionary)
+    df.to_csv(filename, index=False)
+
+
+def export_dict_ragged_to_csv(d, filename):
+    """ export ragged dictionary in csv"""
+    with open(filename, "w", newline='') as outfile:
+        writer = csv.writer(outfile)
+        writer.writerow(d.keys())
+        max_len = 0  # max len of list in a key
+        for v in d.values():
+            if len(v) > max_len:
+                max_len = len(v)
+        rows = []
+        for i in range(max_len):
+            row = []
+            for key in d.keys():
+                if i < len(d[key]):
+                    item = d[key][i]
+                else:
+                    item = ''
+                row.append(item)
+            rows.append(row)
+
+        writer.writerows(rows)

@@ -31,4 +31,4 @@ class PdfDoc:
 
     def export_cumulative_dict(self):
         df = pandas.DataFrame(self.__all_pages_product_dict)
-        df.to_csv('{}product_table.csv'.format(PR.DIR_PROJECT), index=False)
+        df.to_csv(PR.DOC_PRODUCT_TABLE, index=False)
