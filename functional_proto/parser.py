@@ -2,9 +2,8 @@ import csv
 import tabula
 from openpyxl import Workbook
 
-import TEMPLATE
+from modules import TEMPLATE, PDF_CONST as PFC
 from functional_proto import functions as f
-import PDF_CONST as PFC  # contains pdf constants
 
 import sys  # access to functions and variables that allow for working with Python interpreter
 

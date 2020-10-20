@@ -76,3 +76,17 @@ HEADER = ["externalid",
           "custreturnvarianceaccount",
           "vendreturnvarianceaccount",
           "taxSchedule"]
+
+
+
+
+UOM_HEADER = ["Item(Type Name)",
+              "Internal ID *Update Only",
+              "Unit Name (Name)",
+              "Plural Name",
+              "Abbreviation",
+              "Plural Abbreviation",
+              "Conversion Rate(/Base)",
+              "Base Unit",
+              "___for_displayname"
+              ]

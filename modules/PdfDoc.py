@@ -1,7 +1,6 @@
 import pandas
 
-import PDF_CONST as PFC
-from modules import PROJ_CONST as PR
+from modules import PROJ_CONST as PR, PDF_CONST as PFC
 from modules.PdfPage import PdfPage
 
 

@@ -1,8 +1,8 @@
-import PDF_CONST as PFC  # contains pdf constants
+from modules import PDF_CONST as PFC
 from decimal import Decimal
-from modules import GROUPS
-import inflect
-plur = inflect.engine()
+
+# import inflect
+# plur = inflect.engine()
 
 
 class Target:
@@ -11,11 +11,10 @@ class Target:
         self._dictionary = target_dict
         self._config = config_dict
         self._keys = list(self._dictionary.keys())
-
+        self._packaging_abbreviation = {"BOX": "BX", "EACH": "EA", "SHEET": "SHT", "SQUARE FOOT": "SF"}
 
     def fill_target(self, source_d):
         """fill values of target dictionary according to business logic"""
-
 
         row_count = 1
 
@@ -28,6 +27,8 @@ class Target:
 
             item_name = source_d["_series_name"][i] + " " + source_d["_group"][i] + " " + source_d["_subgroup"][i]
             self._dictionary["Item Name"].append(item_name)
+
+            config_row_n = self.config_row_number(item_name)  # row number of TARGET_CONFIG
 
             item_number_and_name = externalid + " " + item_name
             self._dictionary["Item Number and Name"].append(item_number_and_name)
@@ -47,16 +48,42 @@ class Target:
             displayname = " ".join(displayname.split())  # remove multiple spaces
             self._dictionary["displayname"].append(displayname)
 
-            units_per_carton = source_d['_units_per_carton'][i]
-            self._dictionary["Sales QTY Per Pack Unit"].append(units_per_carton)
-
-            units_of_measure = source_d["_units_of_measure"][i]
-            if units_of_measure == "PC":
-                units_of_measure = "EA"
-            self._dictionary["salesdescription"].append(units_of_measure)
-
-            sales_packaging_unit = self.set_packaging_unit(item_name)
+            sales_packaging_unit = self.packaging_unit_configued(
+                config_row_n)  # looks up in csv file the type of product and determines the sales unit
             self._dictionary["Sales Packaging Unit"].append(sales_packaging_unit)
+
+            units_per_carton = source_d['_units_per_carton'][i]
+
+            """ salesdescription """
+            units_of_measure = source_d["_units_of_measure"][i]  # not used but might replace sales_unit_abbreviated
+            sales_unit_abbreviated = self._packaging_abbreviation[sales_packaging_unit]
+            self._dictionary["salesdescription"].append(
+                units_per_carton + " " + units_of_measure + "/BX" if not units_of_measure == "PC" else units_per_carton + " EA/BX")
+
+            # "Pcs in a Box",
+            # "SQFT BY PCS/SHEET",
+            # "SQFT BY BOX",
+            if sales_unit_abbreviated == "EA":
+                self._dictionary["Pcs in a Box"].append(units_per_carton)
+                self._dictionary["SQFT BY PCS/SHEET"].append("")
+                self._dictionary["SQFT BY BOX"].append("")
+            elif sales_unit_abbreviated == "SHT":
+                self._dictionary["Pcs in a Box"].append("")
+                self._dictionary["SQFT BY PCS/SHEET"].append(units_per_carton)
+                self._dictionary["SQFT BY BOX"].append("")
+            elif sales_unit_abbreviated == "BX":
+                self._dictionary["Pcs in a Box"].append("")
+                self._dictionary["SQFT BY PCS/SHEET"].append("")
+                self._dictionary["SQFT BY BOX"].append(units_per_carton)
+            else:
+                self._dictionary["Pcs in a Box"].append("")
+                self._dictionary["SQFT BY PCS/SHEET"].append("")
+                self._dictionary["SQFT BY BOX"].append("")
+
+            Sales_QTY_Per_Pack_Unit = 1
+            if sales_packaging_unit == "BOX":
+                Sales_QTY_Per_Pack_Unit = units_per_carton
+            self._dictionary["Sales QTY Per Pack Unit"].append(units_per_carton)
 
             unit_price = Decimal(source_d["_unit_price"][i])
             self._dictionary["cost"].append(unit_price)
@@ -87,7 +114,10 @@ class Target:
             subsidiary = "Elit Tile Consolidated : Elit Tile Corp (LA)|Elit Tile Consolidated : International Tile and Stone Inc. (noho)"
             self._dictionary["subsidiary"].append(subsidiary)
 
-            product_class = self._config["CLASS"][self.config_row_number(item_name)] # field 24
+            if config_row_n:
+                product_class = self._config["CLASS"][self.config_row_number(item_name)]  # field 24
+            else:
+                product_class = "100"
             self._dictionary["Class"].append(product_class)
 
             vendor1_name = PFC.vendor1_name
@@ -100,40 +130,38 @@ class Target:
             vendor2_subsidiary = PFC.vendor2_subsidiary
             self._dictionary["vendor2_subsidiary"].append(vendor2_subsidiary)
 
-            self._dictionary["itemPriceLine1_itemPriceTypeRef"].append("BASE PRICE") # constant for all vendors
+            self._dictionary["itemPriceLine1_itemPriceTypeRef"].append("BASE PRICE")  # constant for all vendors
 
-            self._dictionary["itemPriceLine1_quantityPricing"].append(0) # constant for all vendors
+            itemPriceLine1_itemPrice = Decimal(Sales_QTY_Per_Pack_Unit) * Decimal(sales_price)
+            self._dictionary["itemPriceLine1_itemPrice"].append(itemPriceLine1_itemPrice)
+
+            self._dictionary["itemPriceLine1_quantityPricing"].append(0)  # constant for all vendors
 
             self._dictionary["taxSchedule"].append("Taxable")
 
+            self._dictionary["vendor1_preferred"].append("T")
 
+            self._dictionary["vendor2_preferred"].append("T")
 
+            row_count += 1
 
-
-
-
-
-
-
-
-
-            row_count+=1
-
-
-    def set_packaging_unit(self, itemname):
-        sales_packaging_unit = "SHEET"  # default
-        sales_packaging_unit = self._config["PACK"][self.config_row_number(itemname)]
+    def packaging_unit_configued(self, row_n):
+        sales_packaging_unit = "EACH"  # default
+        if row_n:
+            sales_packaging_unit = self._config["PACK"][row_n]
         return sales_packaging_unit
 
     def config_row_number(self, itemname):
+        """ @:returns row number of TARGET_CONFIG.csv
+            @:param itemname is the name to look for in th names column of the TARGET_CONFIG.csv"""
+        # print("itemname", itemname)
         row_n = None
+        missing_name = ""
         for i in range(len(self._config["NAMES"])):
             name_list = self._config["NAMES"][i].split(sep=',')
             for name in name_list:
                 if name in itemname.upper():
                     row_n = i
+                missing_name = name
+        # print("missing_name", missing_name)
         return row_n
-
-
-
-
