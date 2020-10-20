@@ -1,6 +1,6 @@
 import pandas
 
-import PDF_CONST as PFC
+import modules.PDF_CONST as PFC
 from modules import PROJ_CONST as PR
 import csv
 
