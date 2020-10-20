@@ -88,5 +88,7 @@ UOM_HEADER = ["Item(Type Name)",
               "Plural Abbreviation",
               "Conversion Rate(/Base)",
               "Base Unit",
-              "___for_displayname"
+              "___for_displayname",
+              "___salesdescription",
+              "___uom_set"
               ]
