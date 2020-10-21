@@ -8,15 +8,13 @@ class PdfLine:
     def token_is_blank(csv_list_item):
         return csv_list_item == '\"\"' or not csv_list_item
 
-    def __init__(self, tabula_csv_reader_list_line, page_data_set, color_table_below):
+    def __init__(self, tabula_csv_reader_list_line):
         """ @:param page_data_set for better detection of tokens"""
-        self._page_data_set = page_data_set
-        self._tablula_line = tabula_csv_reader_list_line
-        self._row = self.treat_row()
+        # self._page_data_set = page_data_set
+        self._tabula_line = tabula_csv_reader_list_line
+        # self._row = self.treat_row()  # check for matches with page_data_set
 
-        self._color_table_below = color_table_below
-
-        self._row_len = len(self._row)  # number of items in the list representing the row
+        # self._row_len = len(self._row)  # number of items in the list representing the row
         self._num_blanks = self.count_blanks()
         # self._all_cells_filled = self.all_cells_filled()  # applies to a table row only
         self._is_color_table_header = self.is_color_table_header()
@@ -27,74 +25,57 @@ class PdfLine:
 
     def contains_series(self):
         """ detects series name in the row"""
-        return PFC.DETECT_SERIES_SET.issubset(set(self._tablula_line))
+        return PFC.DETECT_SERIES_SET.issubset(set(self._tabula_line))
 
     def find_series_name(self):
         """ if row contains series then returns it otherwise returns None """
         name = None
+        cells = []
+        # remove Unnamed cells
         if self.contains_series():
-            if "#" in self._tablula_line[0]:
-                name = self._tablula_line[0].replace('#', '') + " " + self._tablula_line[1]
-            elif "#" in self._tablula_line[1]:
-                name = self._tablula_line[0] + " " + self._tablula_line[2]
-            name = " ".join(name.split())  # remove multiple spaces
+            for item in self._tabula_line[:-3]:
+                if "Unnamed" not in item:
+                    cells.append(item)
+
+            name = "".join(cells).replace('#', '')
+            name = " ".join(name.split()) # remove multiple spaces
+
         return name
 
     def count_blanks(self):
         """ counts number of blanks in a given row"""
         count = 0
-        for token in self._tablula_line:
+        for token in self._tabula_line:
             if PdfLine.token_is_blank(token):
                 count += 1
         return count
 
     def contains_group(self):
-        """if length of row is 1 and the 0th item is not empty string
-         then it contains group name"""
+        """ :returns true if row contains group name, false otherwise"""
         contains = False
-        if self._num_blanks == self._row_len - 1 and not PdfLine.token_is_blank(
-                self._row[0]) and not self._is_color_table_header:
+        if not self._tabula_line[-1] and not self._tabula_line[-2] and not self._tabula_line[-3]:
             contains = True
+        # print("contains group: ", self._tablula_line[-3:], contains, self._tablula_line)
         return contains
 
     def find_group(self):
         group_name = None
+        cells = self._tabula_line[:-3]
         if self.contains_group():
-            group_name = self._row[0]
+            group_name = "".join(cells)
         return group_name
 
     def contains_subgroup(self):
         return self._is_product_table_row
 
-    def subgoup_index(self):
-        index = 0
-
-        if not self._color_table_below:
-            if (not self._row[0] and not self._row[1] and self._row_len > 7) or self._row_len<=7:
-                # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
-                i = 0  # start looking from index
-            elif self._row_len == 7 and self._num_blanks == 1:
-                i = 2
-            else:
-                i = 2
-        else:  # there is color table below
-            if self._row[1]:
-                i = 2  # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
-            else:  # row[1] is empty
-                i = 3  # row contains values of size and vendor code befroe the subgroup and row[1] is empty
-        print(self._color_table_below, i, "sub_index", index, "numblanks", self._num_blanks, "len",self._row_len, self._row)
-        while i < len(self._row):
-            if self._row[i]:
-                index = i
-                break
-            i += 1
-        return index
+    # def subgoup_index(self):
+    #     return 2
 
     def find_subgroup(self):
         subgroup_name = None
         if self.contains_subgroup():
-            index = self.subgoup_index()
-            subgroup_name = self._row[index]
+            index = 2
+            subgroup_name = self._tabula_line[index]
         return subgroup_name
 
     def contains_item_size(self):
@@ -104,101 +85,73 @@ class PdfLine:
     def find_item_size(self):
         item_size = None
         if self.contains_item_size():
-            ITEM_SIZE_INDEX = 0
-            item_size = "".join(self._row[ITEM_SIZE_INDEX].split()[0:3])
+            index = 0
+            item_size = self._tabula_line[index]
         return item_size
 
     def contains_vendor_code(self):
-        # return self.all_cells_filled()
         return self._is_product_table_row
 
-    def vendor_code_index(self):
-        index = 0
-
-        if not self._color_table_below:
-            if (not self._row[0] and not self._row[1] and len(self._row) >= 7):
-                # row doesn't have value of size and vendor_code (it's above) the first nonempty item will contain subgroup
-                return None
-            else:
-                i = 1
-        else:  # there is color table below
-                i = 1
-
-        while i < len(self._row):
-            if self._row[i]:
-                index = i
-                break
-            i += 1
-        return index
+    # def vendor_code_index(self):
+    #     return 1
 
     def find_vendor_code(self):
         code = None
         if self.contains_vendor_code():
-            index = self.vendor_code_index()
-            if index == None:
-                return code
-            if '*' in self._row[index]:
-                code = self._row[index].split(' ')[-2]
-            else:
-                code = self._row[index].split(' ')[-1]  # the last item of the returned by split list
+            index = 1
+            code = str(self._tabula_line[index])
+            if '*' in code:
+                code = code.split(' ')[0]
         return code
 
     def contains_color(self):
         contains = False
-        if not self._color_table_below and self._is_product_table_row:
-            contains = True
-        elif self._color_table_below and self._is_product_table_row:
-            contains = False
-        elif self._color_table_below and self._is_color_table_row and not self._is_color_table_header:  # this is a color table row and it contains color if _row_len==3
-            contains = True
+        if self._is_product_table_row:
+            if self._tabula_line[3]:
+                contains = True
         return contains
 
-    def color_index(self):  # finish this
-        index = None
-        i = self.subgoup_index() + 1  # start from index after subgroup
-
-        while i < len(self._row):
-            if self._row[i]:
-                index = i
-                break
-            i += 1
-        return index
+    # def color_index(self):
+    #     return 3
 
     def find_item_color(self):
+        # TODO finish if is color table row
+        # print("contains_color:", self.contains_color(), "is_header: ", self._is_color_table_header, "is_color_row: ", self._is_color_table_row, self._tablula_line)
         color = None
         if self.contains_color() and self._is_product_table_row:
-            index = self.color_index()
-            color = self._row[index]
-        elif self.contains_color() and self._is_color_table_row:
-            color = ' '.join(self._row).strip()
+            index = 3
+            color = self._tabula_line[index]
+            color = " ".join(color.split())
+        # elif self.contains_color() and self._is_color_table_row:
+        #     color = ' '.join(self._row).strip()
         return color
 
-    def contains_units_per_carton(self):
-        pass
+    # def contains_units_per_carton(self):
+    #     pass
 
     def find_units_per_carton(self):
         upc = None
         if self._is_product_table_row:
-            upc = self._row[-3]
+            upc = self._tabula_line[-3]
         return upc
 
     def find_units_of_measure(self):
         uom = None
         if self._is_product_table_row:
-            uom = self._row[-2]
+            uom = self._tabula_line[-2]
         return uom
 
     def find_unit_price(self):
         up = None
         if self._is_product_table_row:
-            up = self._row[-1]
+            up = self._tabula_line[-1]
         return up
 
     def is_product_table_row(self):
         """returns true if the row from midfile to be output in the outfile"""
-        row_set = set(self._row)
+        row_set = set(self._tabula_line)
         is_valid = False
-        if not self.contains_series() and not self.contains_group() and not self._is_color_table_row and not self._is_color_table_header and PFC.DETECT_SERIES_SET.isdisjoint(
+        if len(self._tabula_line)>6 and not self.contains_series() and not self.contains_group() and not self._is_color_table_row and not self._is_color_table_header and PFC.DETECT_SERIES_SET.isdisjoint(
                 row_set) and PFC.EMPTY_LINE_FLAGS.isdisjoint(
             row_set):
             is_valid = True
@@ -206,49 +159,47 @@ class PdfLine:
 
     def is_color_table_header(self):
         is_header = False
-        for item in self._row:
-            if "COLORS" in item:
+        for item in self._tabula_line:
+            if "COLORS" in str(item):
                 is_header = True
         return is_header
 
     def is_color_table_row(self):
-        is_ctr = False
-        is_ctr = self._color_table_below and self._row_len <= 3 and self._row_len - self._num_blanks <= 2 and not self._is_color_table_header
-        return is_ctr
+        return False
 
-    def extract_first_match(self, phrase):
-        """ @:param phrase is a string with spaces that needs to be broken in several tokens that are present in page_data_set
-        @:returns recursively smaller phrase that is either empty string or contained in the page_data_set """
-        if len(phrase) == 0:
-            return phrase
-        elif phrase in self._page_data_set:
-            return phrase
-        else:
-            return self.extract_first_match(" ".join(phrase.split()[:-1]))  # remove the last word from the token
-
-    def treat_row(self):
-        """ compares token in row to the html dataset and separates string into items that are present in the html dataset"""
-        tabula_line = []
-        for token in self._tablula_line:
-            tabula_line.append(" ".join(token.split()))
-
-        row = []
-        for phrase in tabula_line:
-            if phrase == "":
-                row.append(phrase)
-            else:
-                i = 0  # holds index of the next place to search for a token
-                while i < len(phrase):
-                    le = len(phrase[i:])
-                    fixed = self.extract_first_match(phrase[i:])
-
-                    if not fixed == '':
-                        row.append(fixed)
-                    i = phrase.index(fixed) + len(fixed) + 1  # points to the beginning of next token in phrase
-                    if i < le:
-                        phrase = phrase[i:]  # make next token first
-                    else:
-                        break
-                    i = 0
-
-        return row
+    # def extract_first_match(self, phrase):
+    #     """ @:param phrase is a string with spaces that needs to be broken in several tokens that are present in page_data_set
+    #     @:returns recursively smaller phrase that is either empty string or contained in the page_data_set """
+    #     if len(phrase) == 0:
+    #         return phrase
+    #     elif phrase in self._page_data_set:
+    #         return phrase
+    #     else:
+    #         return self.extract_first_match(" ".join(phrase.split()[:-1]))  # remove the last word from the token
+    #
+    # def treat_row(self):
+    #     """ compares token in row to the html dataset and separates string into items that are present in the html dataset"""
+    #     tabula_line = []
+    #     for token in self._tablula_line:
+    #         tabula_line.append(" ".join(str(token).split()))
+    #
+    #     row = []
+    #     for phrase in tabula_line:
+    #         if phrase == "":
+    #             row.append(phrase)
+    #         else:
+    #             i = 0  # holds index of the next place to search for a token
+    #             while i < len(phrase):
+    #                 le = len(phrase[i:])
+    #                 fixed = self.extract_first_match(phrase[i:])
+    #
+    #                 if not fixed == '':
+    #                     row.append(fixed)
+    #                 i = phrase.index(fixed) + len(fixed) + 1  # points to the beginning of next token in phrase
+    #                 if i < le:
+    #                     phrase = phrase[i:]  # make next token first
+    #                 else:
+    #                     break
+    #                 i = 0
+    #
+    #     return row
