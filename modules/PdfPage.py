@@ -169,15 +169,18 @@ class PdfPage:
             area=PFC.TABLE_COORDINATES, **kwargs
         )
 
-        df = df_list[0]  # the dictionary is on a singleton list
-        df = df.fillna('')  # nan fields are substituted by empty string
-        df = df.astype(str)
+        print("df_list : ",df_list)
 
-        # # for testing
-        # export_dict_ragged_to_csv(df.to_dict(), self.midfilename)
-        # convert dataframe to list of rows including header
+        row_list = []
+        if len(df_list) > 0:
+            df = df_list[0]  # the dictionary is on a singleton list
+            df = df.fillna('')  # nan fields are substituted by empty string
+            df = df.astype(str)
+            # # for testing
+            # export_dict_ragged_to_csv(df.to_dict(), self.midfilename)
+            # convert dataframe to list of rows including header
+            row_list = [list(df.columns), *df.values.tolist()]
 
-        row_list = [list(df.columns), *df.values.tolist()]
 
         # for row in row_list:
         #     print(row)

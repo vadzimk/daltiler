@@ -15,13 +15,13 @@ class PageProductTable:
         # for row in guessed_rows:
         #     print(row)
         self.guessed_rows_strings = [self.join_list_items(item) for item in guessed_rows]  # joins guessed rows and retrurns a list of strings
-        print("guessed_strings:")
-        for string in self.guessed_rows_strings:
-            print(string)
-        # print("---tabulalines:")
-        # for line in lines:
-        #     print(line._tabula_line)
-        print("__ end")
+        # print("guessed_strings:")
+        # for string in self.guessed_rows_strings:
+        #     print(string)
+        # # print("---tabulalines:")
+        # # for line in lines:
+        # #     print(line._tabula_line)
+        # print("__ end")
         self.colors = colors
 
         self.__products = {key: [] for key in
@@ -77,8 +77,8 @@ class PageProductTable:
                     multiplier = len(self.colors)
 
                 if line._is_product_table_row and self._series_name:
-                    print("is_product_table_row: ", line._is_product_table_row)
-                    print("_series_name", self._series_name)
+                    # print("is_product_table_row: ", line._is_product_table_row)
+                    # print("_series_name", self._series_name)
 
                     """push properties to the dictionary"""
                     for i in range(multiplier):
@@ -89,7 +89,7 @@ class PageProductTable:
                                 value = eval("self.%s" % (key))  # line at key
                             self.__products[key].append(value)
 
-            print(valid_line, cur_line_string)
+            # print(valid_line, cur_line_string)
 
     def get_products(self):
         """@:returns the dictionary of products representing product table of the page"""
