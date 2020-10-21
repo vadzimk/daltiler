@@ -165,7 +165,7 @@ class PdfPage:
 
         df_list = tabula.read_pdf(
             input_path=self.infilename, output_format="dataframe", pages=self.pagenumber,
-            guess=True, lattice=False, multiple_tables=False,
+            guess=True, lattice=True, multiple_tables=False,
             area=PFC.TABLE_COORDINATES, **kwargs
         )
 

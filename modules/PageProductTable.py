@@ -15,7 +15,7 @@ class PageProductTable:
         # for row in guessed_rows:
         #     print(row)
         self.guessed_rows_strings = [self.join_list_items(item) for item in guessed_rows]  # joins guessed rows and retrurns a list of strings
-        print("guessed_strings")
+        print("guessed_strings:")
         for string in self.guessed_rows_strings:
             print(string)
         # print("---tabulalines:")
@@ -57,7 +57,7 @@ class PageProductTable:
             # for item in self.guessed_rows_strings:
             #     if item in cur_line_string:
             #         valid_line = True
-            if cur_line_string in self.guessed_rows_strings:
+            if cur_line_string in self.guessed_rows_strings or ('Units' in  cur_line_string and 'Price' in cur_line_string):
                 valid_line = True
 
             if valid_line: # line matches the auto guessed row
@@ -76,7 +76,10 @@ class PageProductTable:
                 if self.colors:  # if color list is present, a product row will be appended the number of colors times
                     multiplier = len(self.colors)
 
-                if line.is_product_table_row() and self._series_name:
+                if line._is_product_table_row and self._series_name:
+                    print("is_product_table_row: ", line._is_product_table_row)
+                    print("_series_name", self._series_name)
+
                     """push properties to the dictionary"""
                     for i in range(multiplier):
                         for key in PFC.PRODUCT_TABLE_FIELDS:
@@ -85,8 +88,8 @@ class PageProductTable:
                             else:
                                 value = eval("self.%s" % (key))  # line at key
                             self.__products[key].append(value)
-            else:
-                print(valid_line, cur_line_string)
+
+            print(valid_line, cur_line_string)
 
     def get_products(self):
         """@:returns the dictionary of products representing product table of the page"""
