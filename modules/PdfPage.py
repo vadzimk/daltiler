@@ -17,9 +17,10 @@ class PdfPage:
     def __init__(self, infilename, pagenumber):
         self.infilename = infilename
         self.pagenumber = pagenumber
-        # print("page:", self.pagenumber)
+        print("page:", self.pagenumber)  # print page number while creating
         self.midfilename = '{}tabulated_{}.csv'.format(PR.DIR_TABULATED_CSV, self.pagenumber)
         self.list_of_csv_rows = None  # contain list of rows from the csv file obtained from tabula
+
         # self.html_page_data_set = set()
 
         # # read the one page from pdf file with tabula
@@ -33,6 +34,7 @@ class PdfPage:
         # New method of recognition with fixed rows
         self.list_of_csv_rows = self.read_fixed_columns_tabula()
         self.list_of_guessed_rows = self.read_guess_table_tabula()
+
 
         # #  get data from html pages
         # html_parser = MyHtmlParser()
@@ -76,13 +78,38 @@ class PdfPage:
     #             color_list.append(line.find_item_color())
     #     return color_list
 
-    def contains_color_table(self):
+    # def contains_color_note(self):
+    #     """ :returns true if current page contains note that available colors are below"""
+    #     has_note = False
+    #     for row in self.list_of_csv_rows:
+    #         row = [str(item) for item in row]
+    #         row_string = "".join(row)
+    #         if "available colors" in row_string:
+    #             has_note = True
+    #     return has_note
+
+    def contains_color_table_header(self):
+        """ :returns true if guessed rows contain "- COLORS" which is usually in color table header"""
         contains = False
-        for row in self.list_of_csv_rows:
+        for row in self.list_of_guessed_rows:
             row = [str(item) for item in row]
             row_string = "".join(row)
-            if "- COLORS" in row_string or "available colors" in row_string:
+            if "- COLORS" in row_string:
                 contains = True
+        return contains
+
+    def contains_color_table(self):
+        """ :returns true if current page contains separate color table on the bottom of the page """
+        # contains = False
+        # note = False
+        # for row in self.list_of_csv_rows:
+        #     row = [str(item) for item in row]
+        #     row_string = "".join(row)
+        #     if "available colors" in row_string:
+        #         note = True
+        #     if note and "COLORS" in row_string:
+        #         contains = True
+        contains = self.contains_color_table_header()
         return contains
 
     # def tabula_detected_color_table(self):
@@ -118,6 +145,7 @@ class PdfPage:
         return color_list
 
     def page_contains_color_info(self):
+        """ :returns true if the product row contains color column not empty false otherwise"""
         contains = False
         max_len = 0
         for line in self._pdf_line_list:
@@ -131,9 +159,11 @@ class PdfPage:
         # print(self.pagenumber, "PdfPage._page_contains_color_info", self._page_contains_color_info)
         # print(self.pagenumber, "PdfPage._color_list", self._color_list)
         # print(self.pagenumber, "external color list", external_color_list)
-        # print(self.pagenumber, self._contains_color_table)
+        # print(self.pagenumber, "_contains_color_table", self._contains_color_table)
+        # print(self.pagenumber, "contains_color_table_header", self.contains_color_table_header())
+        # print(self.pagenumber, "contains_color_note", self.contains_color_note())
 
-        if self._page_contains_color_info or self._color_list:
+        if self._page_contains_color_info or self._color_list:  # color in the product row or in a table below on the same page
             self._product_table = PageProductTable(self._pdf_line_list, self.list_of_guessed_rows, self.pagenumber,
                                                    self._color_list)
         else:  # page doesn't contin color info in itself

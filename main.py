@@ -1,6 +1,7 @@
 import sys
 import time
 from modules.PdfDoc import PdfDoc
+from modules import PROJ_CONST as PR
 from modules.func import *
 
 cleanup()
@@ -34,6 +35,13 @@ start_time = time.time()
 # print(f"Html files created...\nCreating product tables. Please wait...")
 
 price_list = PdfDoc(infilename, page_start=page_start, n_pages=n_pages_to_process)
+print(f"Reading pages:")
+price_list.create_pages()
+print(f"For each page: creating product tables...")
+price_list.create_product_tables()
+print(f"Aggregating data from all tables...")
+price_list.construct_cumulative_dict()
+print(f"Exporting into the file {PR.DOC_PRODUCT_TABLE}")
 price_list.export_cumulative_dict()
 
 end_time = time.time()
