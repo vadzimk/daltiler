@@ -80,7 +80,7 @@ def determine_n_pages(infilename):
 def ask_for_filename(args):
     infilename = None
     while True:
-        infilename = input("Enter the name of pdf file:")
+        infilename = input("Enter the name of pdf file: ")
         if ".pdf" not in infilename and not len(infilename.split()) == 0:
             infilename += ".pdf"
         if len(infilename.split()) == 0 or (os.path.exists(infilename) and os.path.isfile(infilename)):
@@ -93,7 +93,7 @@ def ask_for_filename(args):
 def ask_for_n_pages(total, start):
     n = None
     while True:
-        ans = input("How many pages to process:").upper()
+        ans = input("How many pages to process: ").upper()
         if ans == "ALL":
             n = "ALL"
             break
@@ -108,7 +108,7 @@ def ask_for_n_pages(total, start):
 def ask_for_starting_page(total_pages):
     p = None
     while True:
-        ans = input(f"Enter the starting page number:")
+        ans = input(f"Enter the starting page number: ")
         if ans.isdigit() and int(ans) <= total_pages:
             p = int(ans)
             break

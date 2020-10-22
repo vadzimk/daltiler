@@ -17,7 +17,7 @@ class PdfPage:
     def __init__(self, infilename, pagenumber):
         self.infilename = infilename
         self.pagenumber = pagenumber
-        print("page:", self.pagenumber)
+        # print("page:", self.pagenumber)
         self.midfilename = '{}tabulated_{}.csv'.format(PR.DIR_TABULATED_CSV, self.pagenumber)
         self.list_of_csv_rows = None  # contain list of rows from the csv file obtained from tabula
         # self.html_page_data_set = set()
@@ -33,7 +33,6 @@ class PdfPage:
         # New method of recognition with fixed rows
         self.list_of_csv_rows = self.read_fixed_columns_tabula()
         self.list_of_guessed_rows = self.read_guess_table_tabula()
-
 
         # #  get data from html pages
         # html_parser = MyHtmlParser()
@@ -59,7 +58,7 @@ class PdfPage:
 
         self._color_list = None
         if self._contains_color_table:
-                self._color_list = self.extract_color_list_with_tabula_lattice()
+            self._color_list = self.extract_color_list_with_tabula_lattice()
         # print("color_list", self._color_list)
         # print("contains color table", self._contains_color_table)
 
@@ -82,7 +81,7 @@ class PdfPage:
         for row in self.list_of_csv_rows:
             row = [str(item) for item in row]
             row_string = "".join(row)
-            if "available colors" in row_string:
+            if "- COLORS" in row_string or "available colors" in row_string:
                 contains = True
         return contains
 
@@ -129,10 +128,17 @@ class PdfPage:
         return contains
 
     def create_product_table(self, external_color_list=None):
-        if self.page_contains_color_info() or self._color_list:
-            self._product_table = PageProductTable(self._pdf_line_list, self.list_of_guessed_rows, self.pagenumber, self._color_list)
+        # print(self.pagenumber, "PdfPage._page_contains_color_info", self._page_contains_color_info)
+        # print(self.pagenumber, "PdfPage._color_list", self._color_list)
+        # print(self.pagenumber, "external color list", external_color_list)
+        # print(self.pagenumber, self._contains_color_table)
+
+        if self._page_contains_color_info or self._color_list:
+            self._product_table = PageProductTable(self._pdf_line_list, self.list_of_guessed_rows, self.pagenumber,
+                                                   self._color_list)
         else:  # page doesn't contin color info in itself
-            self._product_table = PageProductTable(self._pdf_line_list, self.list_of_guessed_rows, self.pagenumber, external_color_list)
+            self._product_table = PageProductTable(self._pdf_line_list, self.list_of_guessed_rows, self.pagenumber,
+                                                   external_color_list)
 
     def read_fixed_columns_tabula(self):
         """ :returns list of rows from pdf using tabula fixed column recognition"""
@@ -162,14 +168,11 @@ class PdfPage:
         col2str = {'dtype': str}
         kwargs = {'pandas_options': col2str}
 
-
         df_list = tabula.read_pdf(
             input_path=self.infilename, output_format="dataframe", pages=self.pagenumber,
             guess=True, lattice=True, multiple_tables=False,
             area=PFC.TABLE_COORDINATES, **kwargs
         )
-
-        print("df_list : ",df_list)
 
         row_list = []
         if len(df_list) > 0:
@@ -180,7 +183,6 @@ class PdfPage:
             # export_dict_ragged_to_csv(df.to_dict(), self.midfilename)
             # convert dataframe to list of rows including header
             row_list = [list(df.columns), *df.values.tolist()]
-
 
         # for row in row_list:
         #     print(row)

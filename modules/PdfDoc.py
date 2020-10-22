@@ -9,12 +9,16 @@ class PdfDoc:
 
     def __init__(self, in_file_name, page_start=1, n_pages=1):
         """by default grabs the first page only"""
+        self.page_start = page_start
+        self.n_pages = n_pages
+        self.in_file_name = in_file_name
+
         self._pages = [PdfPage(in_file_name, pagenumber=i) for i in
                        range(page_start, page_start + n_pages)]  # list of PdfPage objects
 
-        for i in range(len(self._pages)-1):
-            self._pages[i].create_product_table(self._pages[i+1]._color_list)
-        self._pages[len(self._pages)-1].create_product_table()  # ceate last product table with no external color list
+        for i in range(len(self._pages) - 1):
+            self._pages[i].create_product_table(self._pages[i + 1]._color_list)
+        self._pages[len(self._pages) - 1].create_product_table()  # ceate last product table with no external color list
 
         self.__list_of_all_product_dicts = [page._product_table.get_products() for page in self._pages]
 
@@ -31,3 +35,36 @@ class PdfDoc:
     def export_cumulative_dict(self):
         df = pandas.DataFrame(self.__all_pages_product_dict)
         df.to_csv(PR.DOC_PRODUCT_TABLE, index=False)
+
+
+    # # =================== Not used  =======================
+    # def create_decending_stack_of_pages(self):
+    #     """ :returns a stack onf PdfPage objects with greatest page number first"""
+    #     range_start = self.page_start
+    #     range_end = self.page_start + self.n_pages
+    #
+    #     _stack = []
+    #
+    #     index = range_end - 1
+    #     while index >= range_start:
+    #         page = PdfPage(self.in_file_name, pagenumber=index)
+    #         _stack.append(page)
+    #         index -= 1
+    #     return _stack
+    #
+    # def construct_product_tables (self, the_stack):
+    #     range_start = self.page_start
+    #     range_end = self.page_start + self.n_pages
+    #
+    #     index = range_end - 1
+    #
+    #     for i in range(len(the_stack)):
+    #         if the_stack[i]._contains_color_table:
+    #             the_stack[i].create_product_table()
+    #         # else:
+
+
+
+
+
+

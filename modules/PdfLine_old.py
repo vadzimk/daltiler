@@ -82,7 +82,7 @@ class PdfLine:
                 i = 2  # row contains values of size and vendor code before the subgroup and there are no empty cells before subgroup(treated cell)
             else:  # row[1] is empty
                 i = 3  # row contains values of size and vendor code befroe the subgroup and row[1] is empty
-        print(self._color_table_below, i, "sub_index", index, "numblanks", self._num_blanks, "len",self._row_len, self._row)
+        # print(self._color_table_below, i, "sub_index", index, "numblanks", self._num_blanks, "len",self._row_len, self._row)
         while i < len(self._row):
             if self._row[i]:
                 index = i
