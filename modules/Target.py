@@ -26,6 +26,7 @@ class Target:
             self._dictionary["itemId"].append(externalid)
 
             item_name = source_d["_series_name"][i] + " " + source_d["_group"][i] + " " + source_d["_subgroup"][i]
+            item_name = " ".join(item_name.split())  #remove double spaces
             self._dictionary["Item Name"].append(item_name)
 
             config_row_n = self.config_row_number(item_name)  # row number of TARGET_CONFIG
@@ -56,6 +57,8 @@ class Target:
 
             """ salesdescription """
             units_of_measure = source_d["_units_of_measure"][i]  # not used but might replace sales_unit_abbreviated
+
+
             sales_unit_abbreviated = self._packaging_abbreviation[sales_packaging_unit]
             self._dictionary["salesdescription"].append(
                 units_per_carton + " " + units_of_measure + "/BX" if not units_of_measure == "PC" else units_per_carton + " EA/BX")
@@ -85,7 +88,9 @@ class Target:
                 Sales_QTY_Per_Pack_Unit = units_per_carton
             self._dictionary["Sales QTY Per Pack Unit"].append(units_per_carton)
 
-            unit_price = Decimal(source_d["_unit_price"][i])
+
+            number_string = source_d["_unit_price"][i]
+            unit_price = Decimal(number_string.replace(',', ''))
             self._dictionary["cost"].append(unit_price)
             self._dictionary["vendor1_purchaseprice"].append(unit_price)
             self._dictionary["vendor2_purchaseprice"].append(unit_price)

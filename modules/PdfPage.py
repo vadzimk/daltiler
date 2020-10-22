@@ -94,7 +94,7 @@ class PdfPage:
         for row in self.list_of_guessed_rows:
             row = [str(item) for item in row]
             row_string = "".join(row)
-            if "- COLORS" in row_string:
+            if "- COLORS" in row_string or "-\rCOLORS" in row_string:
                 contains = True
         return contains
 
@@ -161,7 +161,7 @@ class PdfPage:
         # print(self.pagenumber, "external color list", external_color_list)
         # print(self.pagenumber, "_contains_color_table", self._contains_color_table)
         # print(self.pagenumber, "contains_color_table_header", self.contains_color_table_header())
-        # print(self.pagenumber, "contains_color_note", self.contains_color_note())
+        # ####### print(self.pagenumber, "contains_color_note", self.contains_color_note())
 
         if self._page_contains_color_info or self._color_list:  # color in the product row or in a table below on the same page
             self._product_table = PageProductTable(self._pdf_line_list, self.list_of_guessed_rows, self.pagenumber,
@@ -213,7 +213,6 @@ class PdfPage:
             # export_dict_ragged_to_csv(df.to_dict(), self.midfilename)
             # convert dataframe to list of rows including header
             row_list = [list(df.columns), *df.values.tolist()]
-
         # for row in row_list:
         #     print(row)
         return row_list

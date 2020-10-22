@@ -19,9 +19,9 @@ def cleanup():
 def create_project():
     # create directory for the project
     Path(PR.DIR_PROJECT).mkdir(parents=True, exist_ok=True)
-    Path(PR.DIR_TABULATED_CSV).mkdir(parents=True, exist_ok=True)
-    Path(PR.DIR_PRODUCT_TABLES).mkdir(parents=True, exist_ok=True)
-    Path(PR.DIR_TREATED_ROWS).mkdir(parents=True, exist_ok=True)
+    # Path(PR.DIR_TABULATED_CSV).mkdir(parents=True, exist_ok=True)
+    # Path(PR.DIR_PRODUCT_TABLES).mkdir(parents=True, exist_ok=True)
+    # Path(PR.DIR_TREATED_ROWS).mkdir(parents=True, exist_ok=True)
 
     if os.path.exists(PR.DIR_PROJECT) and os.path.isdir(PR.DIR_PROJECT):
         print(f"New project directory {PR.DIR_PROJECT} created")
