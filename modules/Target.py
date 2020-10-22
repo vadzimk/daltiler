@@ -47,7 +47,7 @@ class Target:
 
             displayname = item_name + " " + item_size + " " + item_color + " " + vendor_code
             displayname = " ".join(displayname.split())  # remove multiple spaces
-            self._dictionary["displayname"].append(displayname)
+            self._dictionary["displayname"].append(displayname.upper())
 
             sales_packaging_unit = self.packaging_unit_configued(
                 config_row_n)  # looks up in csv file the type of product and determines the sales unit
