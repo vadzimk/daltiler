@@ -18,7 +18,7 @@ https://www.java.com/en/download/help/path.html
 
 
 ## Usage
-Follow interactive input / output.
+Follow interactive input/output instructions of the application.
 
 ## Input
 pdf file containing pages with tables from Daltile catalog
