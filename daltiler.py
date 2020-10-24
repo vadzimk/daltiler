@@ -7,6 +7,7 @@ from modules.tf import create_target_and_uom
 
 def main():
 
+
     try:
         cleanup()
         create_project()
@@ -15,10 +16,15 @@ def main():
         return
 
     args = sys.argv  # get the list of arguments
+    infilename = None
     if len(args) == 2:
-        infilename = args[1]
-    else:
-        infilename = ask_for_filename(args) or 'Deltile.pdf'
+        infilename = 'Deltile.pdf'
+        if not os.path.exists(infilename) or not os.path.isfile(infilename):
+            print(f"Default input file not found")
+            infilename = None
+    if not infilename:
+        infilename = ask_for_filename(args)
+
     print(f"Chosen file: {infilename}")
 
     infilename_n_pages = determine_n_pages(infilename)
@@ -49,6 +55,8 @@ def main():
     print(f"Aggregating data from all tables...")
     price_list.construct_cumulative_dict()
     print(f"Exporting into the file {PR.DOC_PRODUCT_TABLE}")
+
+
 
     try:
         price_list.export_cumulative_dict()

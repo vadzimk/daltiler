@@ -4,6 +4,11 @@ archive/
 *.csv
 *.txt
 .idea
+*.jar
+*.spec
+dist/
+build/
+project/
 
 
 *.log

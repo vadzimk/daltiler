@@ -83,10 +83,12 @@ def ask_for_filename(args):
         infilename = input("Enter the name of pdf file: ")
         if ".pdf" not in infilename and not len(infilename.split()) == 0:
             infilename += ".pdf"
-        if len(infilename.split()) == 0 or (os.path.exists(infilename) and os.path.isfile(infilename)):
-            break
-        else:
+        if not infilename:
+            continue
+        if not os.path.exists(infilename) or not os.path.isfile(infilename):
             print(f"{infilename} does not exist.\n ")
+        else:
+            break
     return infilename
 
 
@@ -121,20 +123,21 @@ def ask_for_starting_page(total_pages):
 
 
 def read_to_dict(source_path):
-    list_of_csv_rows = None
+    source_dict = {}
+
     if os.path.exists(source_path) and os.path.isfile(source_path):
         # read the csv file call it csvfile
         with open(source_path, newline='') as csvfile:
             dict_reader_object = csv.DictReader(csvfile, dialect='excel')  # returns reader object that is an iterator
             list_of_csv_rows = list(dict_reader_object)
+            source_dict = {}  # to contain data from product_table.csv file
+            for key in dict_reader_object.fieldnames:
+                source_dict[key] = []
+                for row in list_of_csv_rows:
+                    source_dict[key].append(row[key])
     else:
         print(f"Not found: {source_path}")
 
-    source_dict = {}  # to contain data from product_table.csv file
-    for key in dict_reader_object.fieldnames:
-        source_dict[key] = []
-        for row in list_of_csv_rows:
-            source_dict[key].append(row[key])
     return source_dict
 
 

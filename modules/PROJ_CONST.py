@@ -8,7 +8,7 @@ DOC_PRODUCT_TABLE = './project/product_table.csv'
 DOC_TARGET = './project/target.csv'
 DOC_UOM = './project/uom.csv'
 
-TARGET_CONFIG = './modules/TARGET_CONFIG.csv'
+TARGET_CONFIG = './TARGET_CONFIG.csv'
 
 OUTPUTXLS = 'output.xlsx'
 
