@@ -67,7 +67,7 @@ def convert_to_html(infilename, first, last):
 def determine_n_pages(infilename):
     """determine number of pages in the infile"""
     infilename_n_pages = -1
-    command = "pdfinfo {}".format(infilename)
+    command = "pdfinfo.exe {}".format(infilename)
     pdfinfo_process = subprocess.run(command, capture_output=True)
 
     pdfinfo_output = pdfinfo_process.stdout.decode('utf8').splitlines()
