@@ -3,9 +3,9 @@
 
 It is intended to automate entry of data arriving from its supplier into the ERP system of their client who cannot obtain product and price data in machine readable format. 
  
-Because the catalog is extensive it makes sense to use daltiler each time the catalog is updated.
+Because the catalog is extensive it makes sense to use `daltiler` each time the catalog is updated.
 
-`daltiler` uses tabula-java as an engine for reading the pdf file one page at a time. It uses tabula-python as an interface and python as the language for the application. It obtains supplimentary metadata of the pdf file with pdfinfo.
+`daltiler` uses tabula-java as an engine for reading the pdf file one page at a time. It uses tabula-python as an interface and python as the language for the application.
 
 ## Requirements
 - Java 8

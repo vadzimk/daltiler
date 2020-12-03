@@ -1,12 +1,13 @@
 import sys
 import time
+from datetime import date
+
 from modules.PdfDoc import PdfDoc
-from modules import PROJ_CONST as PR
 from modules.func import *
 from modules.tf import create_target_and_uom
 
-def main():
 
+def main():
 
     try:
         cleanup()
@@ -56,25 +57,26 @@ def main():
     price_list.construct_cumulative_dict()
     print(f"Exporting into the file {PR.DOC_PRODUCT_TABLE}")
 
-
-
     try:
         price_list.export_cumulative_dict()
     except PermissionError:
         print(f"Access to {PR.DOC_PRODUCT_TABLE} denied\nClose applications that might use it and try again")
         return
 
-    print(f"Creating template file and UOM file...")
+    create_target_uom_files = input(f"Create target.csv, uom.csv (y/n) ? ")
 
-    try:
-        create_target_and_uom()
-    except PermissionError:
-        print(f"Access to {PR.DOC_UOM} or {PR.DOC_TARGET} denied\nClose applications that might use it and try again")
-        return
-
+    if create_target_uom_files.lower() == 'y':
+        print(f"Creating template file and UOM file...")
+        try:
+            create_target_and_uom()
+        except:
+            print(
+                f"Access to {PR.DOC_UOM} or {PR.DOC_TARGET} denied\nClose applications that might use it and try again")
+            input(f"Press Enter to close this window")
+            return
 
     end_time = time.time()
-    hours, rem = divmod(end_time-start_time, 3600)
+    hours, rem = divmod(end_time - start_time, 3600)
     minutes, seconds = divmod(rem, 60)
     print(f"Task finished.\n"
           f"Time elapsed: {minutes:.0f} min {seconds:.0f} sec\n"
@@ -82,10 +84,9 @@ def main():
           f"{PR.DOC_TARGET}\n"
           f"{PR.DOC_UOM}")
 
+    input(f"Press Enter to close this window")
 
-if __name__=="__main__":
+
+
+if __name__ == "__main__":
     main()
-
-
-
-

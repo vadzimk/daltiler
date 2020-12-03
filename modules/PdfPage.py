@@ -1,14 +1,12 @@
-import csv
-
 import tabula
 
-from modules.PageProductTable import PageProductTable
-from modules import PROJ_CONST as PR
 from modules import PDF_CONST as PFC
+from modules.PageProductTable import PageProductTable
 from modules.PdfLine import PdfLine
 from modules.func import *
 
-from modules.func import MyHtmlParser
+
+# from modules.func import MyHtmlParser
 
 
 class PdfPage:

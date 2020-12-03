@@ -87,7 +87,7 @@ class Target:
             Sales_QTY_Per_Pack_Unit = 1
             if sales_packaging_unit == "BOX":
                 Sales_QTY_Per_Pack_Unit = units_per_carton
-            self._dictionary["Sales QTY Per Pack Unit"].append(units_per_carton)
+            self._dictionary["Sales QTY Per Pack Unit"].append(Sales_QTY_Per_Pack_Unit)
 
 
             number_string = source_d["_unit_price"][i]
