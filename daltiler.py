@@ -19,7 +19,7 @@ def main():
     args = sys.argv  # get the list of arguments
     infilename = None
     if len(args) == 2:
-        infilename = 'Deltile.pdf'
+        infilename = 'Deltile3.pdf'
         if not os.path.exists(infilename) or not os.path.isfile(infilename):
             print(f"Default input file not found")
             infilename = None

@@ -33,7 +33,6 @@ class PdfPage:
         self.list_of_csv_rows = self.read_fixed_columns_tabula()
         self.list_of_guessed_rows = self.read_guess_table_tabula()
 
-
         # #  get data from html pages
         # html_parser = MyHtmlParser()
 
@@ -120,9 +119,13 @@ class PdfPage:
 
     def extract_color_list_with_tabula_lattice(self):
         # https://tabula-py.readthedocs.io/en/latest/faq.html?highlight=area#how-to-use-area-option
-        df = tabula.read_pdf(input_path=self.infilename, pandas_options={'header': None}, output_format="dataframe",
-                             pages=self.pagenumber,
-                             lattice=True, area=PFC.TABLE_COORDINATES)
+        df = tabula.read_pdf(
+            input_path=self.infilename,
+            pandas_options={'header': None},
+            output_format="dataframe",
+            pages=self.pagenumber,
+            lattice=True,
+            area=PFC.TABLE_COORDINATES)
 
         df_list = []
         for item in df:
@@ -197,8 +200,12 @@ class PdfPage:
         kwargs = {'pandas_options': col2str}
 
         df_list = tabula.read_pdf(
-            input_path=self.infilename, output_format="dataframe", pages=self.pagenumber,
-            guess=True, lattice=True, multiple_tables=False,
+            input_path=self.infilename,
+            output_format="dataframe",
+            pages=self.pagenumber,
+            guess=True,
+            lattice=True,
+            multiple_tables=False,
             area=PFC.TABLE_COORDINATES, **kwargs
         )
 
