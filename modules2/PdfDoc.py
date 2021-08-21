@@ -36,7 +36,23 @@ class PdfDoc:
             for item in self.__list_of_all_product_dicts:
                 self.__all_pages_product_dict[key] += item[key]
 
-        print(f"cumulative dict: {self.__list_of_all_product_dicts}")
+    #TODO patch cumulative dictionary where
+        #
+        # _group ends with  "CONT'D" replace to "" remove any " - "
+        # if empty _item_size	_vendor_code, copy from the previous index
+    def patch_cumulative_dictionary(self):
+        index = None
+        for i, group in enumerate(self.__all_pages_product_dict['_group']):
+            if "CONT'D" in group:
+                item_sizes = self.__all_pages_product_dict['_item_size']
+                vendor_codes = self.__all_pages_product_dict['_vendor_code']
+                if not item_sizes[i]:
+                    item_sizes[i] = item_sizes[i-1]
+                if not vendor_codes[i]:
+                    vendor_codes[i]=vendor_codes[i-1]
+                self.__all_pages_product_dict['_group'][i] = group.replace("CONT'D", "").rstrip(' -')
+
+        # print(f"cumulative dict: {self.__list_of_all_product_dicts}")
 
     def export_cumulative_dict(self):
         df = pandas.DataFrame(self.__all_pages_product_dict)

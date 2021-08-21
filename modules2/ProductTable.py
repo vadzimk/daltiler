@@ -22,9 +22,8 @@ class ProductTable:
         self._units_of_measure = None
         self._unit_price = None
 
-        print(f"product table init page{self._pagenumber}")
+        # print(f"product table init page{self._pagenumber}")
 
-        # TODO continue this file
 
     def build_table(self):
         """ sees what fields are detected by the PdfLine and builds product table"""

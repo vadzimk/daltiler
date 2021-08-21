@@ -1,3 +1,5 @@
+import pprint
+
 from modules2.PdfLine import PdfLine
 
 
@@ -23,3 +25,6 @@ class DataTable:
     @property
     def lines(self):
         return self.__pdf_lines
+
+    def __str__(self):
+        return pprint.pformat(self.__csv_rows)

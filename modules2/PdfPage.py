@@ -49,10 +49,19 @@ class PdfPage:
 
             index_to_product_rows_guess_lattice.append(guessed_rows)
 
+        # TODO debugging:
+        def debug():
+            for i, t in enumerate(self.__data_tables):
+                print(f"data-table index={i}")
+                print(t)
+            for ig, gr in enumerate(index_to_product_rows_guess_lattice):
+                print(f"guessed rows set index={ig}")
+                print(pprint.pformat(gr))
+
         self.__product_tables = []
-        print('make_product_tables')
+        # print('make_product_tables')
         for index, dt in enumerate(self.__data_tables):
-            print(self.__pagenumber)
+            # print(self.__pagenumber)
             try:
                 pt = ProductTable(
                     self.__pagenumber,
@@ -62,11 +71,9 @@ class PdfPage:
                 )
                 self.__product_tables.append(pt)
             except Exception as e:
+                # debug()
                 print(f"exception {e}")
                 traceback.print_exc()
-
-
-
 
     def build_tables(self):
         for table in self.__product_tables:
@@ -95,13 +102,13 @@ class PdfPage:
             pandas_options={'dtype': str, 'header': None}
         )
 
-        print("dflist:")
-        self.print_df_list(df_list)
+        # print("dflist:")
+        # self.print_df_list(df_list)
 
         rows = self.dfs_to_rows(df_list, header=False)
-        print("rows:")
-        for row in rows:
-            print(row)
+        # print("rows:")
+        # for row in rows:
+        #     print(row)
         return rows
 
     def read_guess_lattice_tabula(self):
@@ -150,10 +157,12 @@ class PdfPage:
                     tables.append(cur_table)
                 cur_table = [row]
             else:
+                if not len(cur_table) and not row[-1] == 'Price':
+                    continue  # skip 1st line of color header with double rows
                 cur_table.append(row)
         tables.append(cur_table)  # append the last table
 
-        result = [t for t in tables if not is_color_header(t[0])]
+        result = [t for t in tables if not is_color_header(t[0]) or is_color_header(t[1])]
 
         # print("\ndata tables:")
         # for i, t in enumerate(result):
@@ -201,18 +210,21 @@ class PdfPage:
 
     @staticmethod
     def list_contains_substr(alist, substr):
-        for item in alist:
-            if substr in item.upper():
-                return True
+        for row in alist:
+            for item in row:
+                if substr in str(item).upper():
+                    return True
         return False
 
     @staticmethod
     def filter_color_dfs(dfs):
-        return [df for df in dfs if PdfPage.list_contains_substr(list(df.columns.values), "COLORS")]
+        return [df.fillna('') for df in dfs if
+                PdfPage.list_contains_substr([list(df.columns.values), *df.values], "COLORS")]
 
     @staticmethod
     def filter_product_dfs(dfs):
-        return [df for df in dfs if not PdfPage.list_contains_substr(list(df.columns.values), "COLORS")]
+        return [df.fillna('') for df in dfs if
+                not PdfPage.list_contains_substr([list(df.columns.values), *df.values], "COLORS")]
 
     @staticmethod
     def print_df_list(df_list):
@@ -240,7 +252,7 @@ class PdfPage:
             """:return (key, key.stripped)"""
             for item in list(df.columns.values):
                 if "COLORS" in item.upper():
-                    return item, item.replace("COLORS", "").strip(' -\r').replace(" ", "") # No-spaces-key
+                    return item, item.replace("COLORS", "").strip(' -\r').replace(" ", "")  # No-spaces-key
 
         def make_color_list(df):
             key = get_key(df)[0]

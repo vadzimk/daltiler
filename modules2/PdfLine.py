@@ -67,6 +67,8 @@ class PdfLine:
         cells = self._tabula_line[:-3]
         if self.contains_group():
             group_name = "".join(cells)
+            group_name = re.sub(r"\s?-\s?", r' - ', group_name, 1)
+
         return group_name
 
     def contains_subgroup(self):
