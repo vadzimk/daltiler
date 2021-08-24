@@ -10,10 +10,14 @@ class PdfLine:
     def token_is_blank(csv_list_item):
         return csv_list_item == '\"\"' or not csv_list_item
 
-    def __init__(self, tabula_csv_reader_list_line):
+    def __init__(self, fixed_row, template_row):
         """ @:param page_data_set for better detection of tokens"""
         # self._page_data_set = page_data_set
-        self._tabula_line = tabula_csv_reader_list_line
+        self._tabula_line = fixed_row
+        self._template_line = template_row
+        print("f_row", fixed_row)
+        print("t_row", template_row)
+        print('\n')
         # self._row = self.treat_row()  # check for matches with page_data_set
 
         # self._row_len = len(self._row)  # number of items in the list representing the row
@@ -39,10 +43,11 @@ class PdfLine:
                 if "Unnamed" not in item:
                     cells.append(item)
 
-            name = "".join(cells).replace('#', '')
+            name = "".join(cells).replace('# ', '').replace(' #', '')
             name = " ".join(name.split()) # remove multiple spaces
             # name = re.sub(r'(?<=[-])(?=[^\s])', r' ', name, 1)
-            name = re.sub(r"\s?-\s?", r' - ', name, 1)
+            name = re.sub(r"\s?-\s?", r' - ', name, 1).replace('§', '').rstrip('#')
+            # print(name)
 
         return name
 
@@ -121,7 +126,6 @@ class PdfLine:
     #     return 3
 
     def find_item_color(self):
-        # TODO finish if is color table row
         # print("contains_color:", self.contains_color(), "is_header: ", self._is_color_table_header, "is_color_row: ", self._is_color_table_row, self._tablula_line)
         color = None
         if self.contains_color() and self._is_product_table_row:

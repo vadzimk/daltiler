@@ -174,3 +174,20 @@ def export_dict_ragged_to_csv(d, filename):
             rows.append(row)
 
         writer.writerows(rows)
+
+
+def find_tabula_template_json_filename():
+    found = False
+    filename = None
+    dir_list = os.listdir()
+    for f in dir_list:
+        if 'tabula-template.json' in f:
+            filename = f
+            found = True
+            break
+    if not found:
+        print(f"tabula-template.json not found in the current directory\n"
+              f"Make table selections in Tabula for Windows,\n"
+              f"save the template in the current directory,\n"
+              f"and try again.")
+    return filename

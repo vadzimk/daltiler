@@ -3,6 +3,8 @@ import pickle
 import sys
 import time
 
+import tabula
+
 from modules2.PdfDoc import PdfDoc
 from modules2 import PROJ_CONST as PR
 from modules2.func import *
@@ -32,6 +34,12 @@ from modules.tf import create_target_and_uom
 
 
 def main():
+
+    DOC_SELECTIONS_COORDINATES = find_tabula_template_json_filename()
+    if not DOC_SELECTIONS_COORDINATES:
+        input(f"Press Enter to close this window")
+        return
+
     try:
         cleanup()
         create_project()
@@ -71,7 +79,13 @@ def main():
     # price_list = PdfDoc('3.pdf', 1, 3)
     # price_list = PdfDoc('Daltile2.pdf', 1, 1)
     # price_list = PdfDoc('Daltile3.pdf', 1, 187)
-    price_list = PdfDoc(infilename, page_start=page_start, n_pages=n_pages_to_process)
+
+    price_list = PdfDoc(
+        infilename,
+        template_json=DOC_SELECTIONS_COORDINATES,
+        page_start=page_start,
+        n_pages=n_pages_to_process
+    )
 
     # # ============= option to use cache ============
     # rescan = True
@@ -89,18 +103,18 @@ def main():
     # else:
     #     price_list = import_pages(pl_cache_name)
     # print('=======create tables now============')
-    try:
-        print(f"Reading pages:")
-        price_list.create_pages()
-        print(f"For each page: creating product tables...")
-        price_list.create_product_tables()
-        print(f"Aggregating data from all tables...")
-        price_list.construct_cumulative_dict()
-        price_list.patch_cumulative_dictionary()
-        print(f"Exporting into the file {PR.DOC_PRODUCT_TABLE}")
-    except:
-        print("Format of this Pdf document is not supported")
-        return
+    # try:
+    print(f"Reading pages:")
+    price_list.create_pages()
+    print(f"For each page: creating product tables...")
+    price_list.create_product_tables()
+    print(f"Aggregating data from all tables...")
+    price_list.construct_cumulative_dict()
+    price_list.patch_cumulative_dictionary()
+    print(f"Exporting into the file {PR.DOC_PRODUCT_TABLE}")
+    # except:
+    #     print("Format of this Pdf document is not supported")
+    #     return
 
     try:
         price_list.export_cumulative_dict()
@@ -108,7 +122,7 @@ def main():
         print(f"Access to {PR.DOC_PRODUCT_TABLE} denied\nClose applications that might use it and try again")
         return
 
-    create_target_uom_files = input(f"Create target.csv, uom.csv (y/n) ? ")
+    create_target_uom_files = input(f"\nYou can open product_table.csv now correct and save and close it.\nCreate target.csv, uom.csv (y/n) ? ")
 
     if create_target_uom_files.lower() == 'y':
         print(f"Creating template file and UOM file...")
