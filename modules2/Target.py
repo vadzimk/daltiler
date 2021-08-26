@@ -1,3 +1,5 @@
+import re
+
 from modules import PDF_CONST as PFC
 from decimal import Decimal
 
@@ -40,6 +42,8 @@ class Target:
             self._dictionary["vendor2_code"].append(vendor_code)
 
             item_size = source_d["_item_size"][i]
+
+            item_size = re.sub(r'(?<=[0-9]) X (?=[0-9])', r'X', item_size.upper())
             self._dictionary["Item Size"].append(item_size)
 
             item_color = source_d["_item_color"][i]

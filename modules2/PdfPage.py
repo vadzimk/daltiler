@@ -105,8 +105,8 @@ class PdfPage:
             pandas_options={'dtype': str, 'header': None}
         )
 
-        print("fixed dflist:")
-        self.print_df_list(df_list)
+        # print("fixed dflist:")
+        # self.print_df_list(df_list)
 
         rows = self.df_to_rows(df_list[0], header=False)
         # print("fixed rows:")
@@ -147,18 +147,21 @@ class PdfPage:
     def make_data_table_rows(fixed_rows, template_rows):
         """ @:return tuple (data_rows_form_fixed, data_rows_from_template) """
 
-        def is_color_header(r):
+        def is_color_header_in_fixed(r):
             r1 = [str(item) for item in r]
             row_string = "".join(r1)
-            if "COLORS" in row_string:
+            if "COLORS" in row_string and not r[0]:
                 return True
             return False
+
+        def is_color_header_in_template(r):
+            return len(r) == 1 and "COLORS" in r[0]
 
         def break_into_separate_selections(f_rows):
             tables = []
             cur_table = []
             for row in f_rows:
-                if row[-1] == 'Price' or is_color_header(row):
+                if row[-1] == 'Price' or is_color_header_in_fixed(row):
                     if len(cur_table) > 0:
                         tables.append(cur_table)
                     cur_table = [row]
@@ -173,18 +176,21 @@ class PdfPage:
         for r in fixed_rows:
             print(r)
         print("template_rows")
-        for r in template_rows:
-            print(r)
+        for r_set in template_rows:
+            for r in r_set:
+                print(r)
+            print('-'*10)
         print('\n')
 
         fixed_result = [t for t in break_into_separate_selections(fixed_rows) if
-                        not (is_color_header(t[0]) or is_color_header(t[1]))]
+                        not (is_color_header_in_fixed(t[0]) or is_color_header_in_fixed(t[1]))]
         template_result = []
         for t in template_rows:
-            if not (is_color_header(t[0]) or is_color_header(t[1])):
+            if not (is_color_header_in_template(t[0]) or is_color_header_in_template(t[1])):
+                # print("not color header: ", t[0], t[1])
                 if "Units/\rCarton" in t[0]:
-                    dummy_list = ['']*len(t)
-                    t.insert(1, dummy_list)
+                    dummy_row = [''] * len(t)
+                    t.insert(1, dummy_row)
                 template_result.append(t)
 
         # debug
@@ -201,7 +207,7 @@ class PdfPage:
                 print(r2)
 
         result = []
-        for index, _ in enumerate(template_result):
+        for index, _ in enumerate(fixed_result):
             result.append((fixed_result[index], template_result[index]))
 
         return result
@@ -273,7 +279,6 @@ class PdfPage:
                 pandas_options={'dtype': str, 'header': None}
 
             )
-            # print("tabula.read_pdf with area")
 
             try:
                 df = df_singleton[0]  # the dictionary is on a singleton list
@@ -285,9 +290,12 @@ class PdfPage:
             except IndexError:
                 pass
                 # print(f"No selections on page {pagenumber}")
-        # debugging
 
-        result =[self.df_to_rows(df, header=False) for df in df_list]
+        # debugging
+        print("tabula.read_pdf with template")
+        self.print_df_list(df_list)
+
+        result = [self.df_to_rows(df, header=False) for df in df_list]
 
         return result
 

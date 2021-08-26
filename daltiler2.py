@@ -8,7 +8,7 @@ import tabula
 from modules2.PdfDoc import PdfDoc
 from modules2 import PROJ_CONST as PR
 from modules2.func import *
-from modules.tf import create_target_and_uom
+from modules2.tf import create_target_and_uom
 
 # pl_cache_name = 'cache.pickle'
 

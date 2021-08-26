@@ -15,9 +15,9 @@ class PdfLine:
         # self._page_data_set = page_data_set
         self._tabula_line = fixed_row
         self._template_line = template_row
-        print("f_row", fixed_row)
-        print("t_row", template_row)
-        print('\n')
+        # print("f_row", fixed_row)
+        # print("t_row", template_row)
+        # print('\n')
         # self._row = self.treat_row()  # check for matches with page_data_set
 
         # self._row_len = len(self._row)  # number of items in the list representing the row
@@ -39,15 +39,14 @@ class PdfLine:
         cells = []
         # remove Unnamed cells
         if self.contains_series():
-            for item in self._tabula_line[:-3]:
+            for item in self._template_line[:-3]:
                 if "Unnamed" not in item:
-                    cells.append(item)
+                    cells.append(item.replace('#\r', ' '))
 
             name = "".join(cells).replace('# ', '').replace(' #', '')
             name = " ".join(name.split()) # remove multiple spaces
-            # name = re.sub(r'(?<=[-])(?=[^\s])', r' ', name, 1)
             name = re.sub(r"\s?-\s?", r' - ', name, 1).replace('§', '').rstrip('#')
-            # print(name)
+            # print("series_name:", name)
 
         return name
 
@@ -69,7 +68,7 @@ class PdfLine:
 
     def find_group(self):
         group_name = None
-        cells = self._tabula_line[:-3]
+        cells = self._template_line[:-3]
         if self.contains_group():
             group_name = "".join(cells)
             group_name = re.sub(r"\s?-\s?", r' - ', group_name, 1)

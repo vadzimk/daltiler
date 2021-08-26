@@ -18,8 +18,28 @@ class DataTable:
         tuple (fixed_line, template_line)
         """
         result =[]
-        for index, t_row in enumerate(template_rows):
-            result.append((fixed_rows[index], t_row))
+        # print('\n')
+        # print("fixed rows len:",len(fixed_rows))
+        # for r in fixed_rows:
+        #     print(r)
+        # print('-'*20)
+        # print("template rows len:",len(template_rows))
+        # for r in template_rows:
+        #     print(r)
+        #
+        # print('='*20)
+        #
+        # print("creating PdfLines")
+        for index, f_row in enumerate(fixed_rows):
+            # print("index", index)
+            # print("t_row: ", t_row)
+            # print("f_row", fixed_rows[index])
+            try:
+                t_row = template_rows[index]
+            except IndexError:
+                t_row = ['']*len(template_rows[0])
+
+            result.append((f_row, t_row))
         return result
 
 

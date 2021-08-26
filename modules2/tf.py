@@ -1,8 +1,8 @@
 #  template filler
-from modules import TEMPLATE
-from modules.func import *
-from modules.Target import Target
-from modules.Uom import Uom
+from modules2 import TEMPLATE
+from modules2.func import *
+from modules2.Target import Target
+from modules2.Uom import Uom
 
 def create_target_and_uom():
     source_dict = read_to_dict(PR.DOC_PRODUCT_TABLE)
