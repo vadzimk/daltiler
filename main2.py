@@ -1,9 +1,6 @@
 import json
 import math
 import time
-import trace
-import traceback
-from datetime import datetime
 
 from PySide2.QtCore import Slot, QRegExp, QObject, Signal, QThread
 from PySide2.QtGui import QPalette, QColor, QRegExpValidator
@@ -41,8 +38,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.errors = []
         self.thread = None
         self.worker = None
-        self.initialize_fields()
+        # self.initialize_fields()
 
+    # for debugging
     def initialize_fields(self):
         self.lineEdit.setText("D:/Tileshop/daltiler/n.pdf")
         self.lineEdit_4.setText("D:/Tileshop/daltiler/n.tabula-template.json")
@@ -68,7 +66,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.pushButton_7.clicked.connect(self.select_output_path)
         self.lineEdit_9.textChanged.connect(self.handle_edit_output_path)
-
 
     @Slot(None)
     def open_file(self, path):
@@ -99,7 +96,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         except Exception:
             pass
         self.pushButton.clicked.connect(self.handle_run)
-
 
     @Slot(None)
     def select_output_path(self):
@@ -149,7 +145,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.label.setText("/")
                 self.label_3.setText("/")
 
-    def handle_background(self, line_edit_obj, is_valid):
+    @staticmethod
+    def handle_background(line_edit_obj, is_valid):
         palette = QPalette()
         if not is_valid:
             palette.setColor(QPalette.Base, QColor(255, 0, 0, 127))
@@ -280,7 +277,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         print('progress', self.progressBar.value())
 
     def show_info_dialog(self, text):
-        ret = QMessageBox.information(self, "Info", text, QMessageBox.StandardButton.Ok)
+        QMessageBox.information(self, "Info", text, QMessageBox.StandardButton.Ok)
 
     def show_error_dialog(self, text):
         ret = QMessageBox.warning(self, "Error", text, QMessageBox.StandardButton.Ok)
@@ -357,7 +354,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_4.setEnabled(False)
         self.pushButton.setEnabled(False)
         self.pushButton.clicked.disconnect()
-        self.pushButton.clicked.connect(lambda : self.worker.run()) # btn re-enters run
+        self.pushButton.clicked.connect(lambda: self.worker.run())  # btn re-enters run
         self.enable_line_edits_and_selects(False)
 
         args = {
@@ -441,11 +438,9 @@ class Worker(QObject):
             self.restart.emit()
             return
 
-
         price_list.create_product_tables()
         price_list.construct_cumulative_dict()
         price_list.patch_cumulative_dictionary()
-        timestamp = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
 
         product_table_path = f'{self.output_path}/product_table.csv'
         product_table_export_success = False
@@ -495,4 +490,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-
