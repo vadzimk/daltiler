@@ -17,11 +17,12 @@ class PdfDoc:
         self.__list_of_all_product_dicts = []
         self.__all_pages_product_dict = {}  # dictionary that will hold the items of all product tables
 
-    def create_pages(self):
+    def create_pages(self, callback=lambda p: None):
         self.__pages = [PdfPage(
             self.__in_file_name,
             i,
-            coordinates=self.extract_page_data_from_json_data(json_data=self.__jsondata, pagenumber=i)
+            coordinates=self.extract_page_data_from_json_data(json_data=self.__jsondata, pagenumber=i),
+            callback=callback
         ) for i in range(self.__page_start, self.__page_start + self.__n_pages)]
 
     def create_product_tables(self):
@@ -59,9 +60,10 @@ class PdfDoc:
 
         # print(f"cumulative dict: {self.__list_of_all_product_dicts}")
 
-    def export_cumulative_dict(self):
+    def export_cumulative_dict(self, path=PR.DOC_PRODUCT_TABLE):
         df = pandas.DataFrame(self.__all_pages_product_dict)
-        df.to_csv(PR.DOC_PRODUCT_TABLE, index=False)
+        df.to_csv(path, index=False)
+        return True
 
     @staticmethod
     def extract_page_data_from_json_data(json_data, pagenumber):

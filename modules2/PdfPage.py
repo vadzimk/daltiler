@@ -11,7 +11,7 @@ import pprint
 class PdfPage:
     """ when page is created it reads the pdf doc at that page in necessary modes """
 
-    def __init__(self, infilename, pagenumber, coordinates):
+    def __init__(self, infilename, pagenumber, coordinates, callback=lambda p: None):
         self.__infilename = infilename
         self.__pagenumber = pagenumber
         self.__coordinates = coordinates
@@ -31,6 +31,7 @@ class PdfPage:
         self.__color_dict = self.make_color_dict()
         # print(self.__color_dict)
         self.__product_tables = []
+        callback(self.__pagenumber)
 
     def make_product_tables(self, color_dict_list):
         """ for each DataTable create product table using color dict
@@ -179,7 +180,7 @@ class PdfPage:
         for r_set in template_rows:
             for r in r_set:
                 print(r)
-            print('-'*10)
+            print('-' * 10)
         print('\n')
 
         fixed_result = [t for t in break_into_separate_selections(fixed_rows) if
@@ -208,7 +209,13 @@ class PdfPage:
 
         result = []
         for index, _ in enumerate(fixed_result):
-            result.append((fixed_result[index], template_result[index]))
+            print("length of template_result", len(template_result))
+            if len(template_result) > index:
+                print("index", index)
+                t_row = template_result[index]
+            else:
+                t_row = [''] * 4
+            result.append((fixed_result[index], t_row))
 
         return result
 
