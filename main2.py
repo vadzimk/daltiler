@@ -1,9 +1,11 @@
 import json
 import math
 import time
+import trace
+import traceback
 from datetime import datetime
 
-from PySide2.QtCore import Slot, QRegExp
+from PySide2.QtCore import Slot, QRegExp, QObject, Signal, QThread
 from PySide2.QtGui import QPalette, QColor, QRegExpValidator
 from PySide2.QtWidgets import *
 from UI_MainWindow import Ui_MainWindow
@@ -25,16 +27,28 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_5.setVisible(False)
         self.connect_signals_and_slots()
 
+        # Worker args
         self.infilename = None
         self.template_filename = None
-        self.infilename_n_pages = None
         self.page_start = None
         self.page_end = None
         self.output_path = None
         self.product_table_path = None
-        self.coro = self.run_generator()
+        #  end Worker args
+
+        self.infilename_n_pages = None
         self.pushButton.setText("Start")
         self.errors = []
+        self.thread = None
+        self.worker = None
+        self.initialize_fields()
+
+    def initialize_fields(self):
+        self.lineEdit.setText("D:/Tileshop/daltiler/n.pdf")
+        self.lineEdit_4.setText("D:/Tileshop/daltiler/n.tabula-template.json")
+        self.lineEdit_2.setText("5")
+        self.lineEdit_3.setText("5")
+        self.lineEdit_9.setText("D:/Tileshop/daltiler/project_daltiler")
 
     def connect_signals_and_slots(self):
         self.pushButton_3.clicked.connect(self.select_infilename)
@@ -55,9 +69,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_7.clicked.connect(self.select_output_path)
         self.lineEdit_9.textChanged.connect(self.handle_edit_output_path)
 
-    def restart(self):
-        self.coro = self.run_generator()
-        self.pushButton.setText("Start")
 
     @Slot(None)
     def open_file(self, path):
@@ -83,8 +94,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusbar.clearMessage()
         self.pushButton_5.setVisible(False)
         self.enable_line_edits_and_selects(True)
+        try:
+            self.pushButton.clicked.disconnect()
+        except Exception:
+            pass
+        self.pushButton.clicked.connect(self.handle_run)
 
-        self.restart()
 
     @Slot(None)
     def select_output_path(self):
@@ -258,8 +273,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_7.setEnabled(value)
 
     def set_page_progress(self, p):
+        # QApplication.processEvents()
         progress = int(math.ceil((p - self.page_start + 1) * 100 / (self.page_end - self.page_start + 1)))
         self.progressBar.setValue(min(progress, 99))
+        self.statusbar.showMessage(f"Read page: {p}")
         print('progress', self.progressBar.value())
 
     def show_info_dialog(self, text):
@@ -270,66 +287,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if ret:
             self.errors = []
 
-    @Slot(None)
-    def handle_run(self):
-        ready = self.set_start_enabled() and self.check_input()
-        if not ready:
-            return
-        try:
-            next(self.coro)
-        except StopIteration:
-            return
+    def on_product_table_exported(self, time_msg):
+        self.statusbar.showMessage(time_msg)
 
-    def run_generator(self):
-
-        start_time = time.time()
-        self.progressBar.setValue(0)
-        self.progressBar.setVisible(True)
-        self.pushButton_4.setEnabled(False)
-        self.pushButton.setEnabled(False)
-        print("progress bar is visible",self.progressBar.isVisible())
-        print("progress bar value",self.progressBar.value())
-
-        price_list = PdfDoc(
-            in_file_name=self.infilename,
-            template_json=self.template_filename,
-            page_start=self.page_start,
-            n_pages=self.page_end - self.page_start + 1
-        )
-        try:
-            price_list.create_pages(lambda p: self.set_page_progress(p))
-        except IndexError:
-            err_msg = f"{self.template_filename} doesn't contain required tables"
-            self.show_error_dialog(err_msg)
-            self.restart()
-
-        price_list.create_product_tables()
-        price_list.construct_cumulative_dict()
-        price_list.patch_cumulative_dictionary()
-        timestamp = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
-        self.product_table_path = f'{self.output_path}/product_table.csv'
-        product_table_export_success = False
-        while not product_table_export_success:
-            try:
-                product_table_export_success = price_list.export_cumulative_dict(self.product_table_path)
-                end_time = time.time()
-                hours, rem = divmod(end_time - start_time, 3600)
-                minutes, seconds = divmod(rem, 60)
-
-                time_msg = f"Time elapsed: {minutes:.0f} min {seconds:.0f} sec\n"
-                self.statusbar.showMessage(time_msg)
-
-                self.show_info_dialog("Product table created!\nYou may edit it before continuing")
-            except PermissionError:
-                err_msg = f"{os.path.basename(self.product_table_path)}\nAccess denied. Close applications that might use it and press Continue"
-                self.show_error_dialog(err_msg)
-                self.pushButton.setText("Continue")
-                self.pushButton.setEnabled(True)
-                self.statusbar.showMessage(err_msg)
-                self.pushButton_4.setEnabled(False)
-
-                yield
-
+        self.show_info_dialog("Product table created!\nYou may edit it before continuing")
         # change ui to Continue
         self.enable_line_edits_and_selects(False)
         self.pushButton.setText("Continue")
@@ -342,31 +303,17 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             self.pushButton_5.clicked.disconnect()
         except Exception:
             pass
-        self.pushButton_5.clicked.connect(lambda: self.open_file(self.product_table_path))
-        yield
+        self.pushButton_5.clicked.connect(lambda: self.open_file(f"{self.output_path}/product_table.csv"))
 
-        # continuing
-        target_uom_export_success = False
-        while not target_uom_export_success:
-            try:
-                target_uom_export_success = create_target_and_uom(
-                    self.product_table_path,
-                    f'{self.output_path}/target.csv',
-                    f'{self.output_path}/uom.csv'
-                )
-                self.statusbar.clearMessage()
-                self.progressBar.setValue(100)
-                self.show_info_dialog("Output files created!")
-            except PermissionError:
-                err_msg = f"target.csv or uom.csv\nAccess denied. Close applications that might use it and press Continue"
-                self.show_error_dialog(err_msg)
-                self.pushButton.setText("Continue")
-                self.pushButton.setEnabled(True)
-                self.statusbar.showMessage(err_msg)
-                self.pushButton_4.setEnabled(False)
+    def on_permission_error(self):
+        self.pushButton.setText("Continue")
+        self.pushButton.setEnabled(True)
+        self.pushButton_4.setEnabled(False)
 
-                yield
-
+    def on_finished_success(self):
+        self.statusbar.clearMessage()
+        self.progressBar.setValue(100)
+        self.show_info_dialog("Output files created!")
         # Change ui to done
         self.pushButton_4.setEnabled(True)
         self.pushButton.setText("Start")
@@ -381,6 +328,161 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.statusbar.showMessage("Done")
         self.enable_line_edits_and_selects(False)
+
+    @Slot(None)
+    def on_restart(self):
+        try:
+            self.pushButton.clicked.disconnect()
+        except Exception:
+            pass
+        self.pushButton.clicked.connect(self.handle_run)
+        self.pushButton.setText("Start")
+        self.pushButton.setEnabled(True)
+        self.pushButton_4.setEnabled(True)
+        # self.worker.deleteLater()
+        # self.thread.deleteLater()
+        # self.thread.quit()
+        self.progressBar.setVisible(False)
+        self.enable_line_edits_and_selects(True)
+
+    @Slot(None)
+    def handle_run(self):
+        ready = self.set_start_enabled() and self.check_input()
+        if not ready:
+            return
+        # Prepare ui to run
+        print("handle run entered")
+        self.progressBar.setValue(0)
+        self.progressBar.setVisible(True)
+        self.pushButton_4.setEnabled(False)
+        self.pushButton.setEnabled(False)
+        self.pushButton.clicked.disconnect()
+        self.pushButton.clicked.connect(lambda : self.worker.run()) # btn re-enters run
+        self.enable_line_edits_and_selects(False)
+
+        args = {
+            "infilename": self.infilename,
+            "template_filename": self.template_filename,
+            "page_start": self.page_start,
+            "page_end": self.page_end,
+            "output_path": self.output_path,
+            "product_table_path": self.product_table_path
+        }
+
+        self.thread = QThread()
+        self.worker = Worker(**args)
+        print("thread created")
+        self.worker.moveToThread(self.thread)
+        self.thread.started.connect(self.worker.run)
+        self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.progress.connect(self.set_page_progress)
+        self.worker.error.connect(self.show_error_dialog)
+        self.worker.restart.connect(self.on_restart)
+        self.worker.product_table_exported.connect(self.on_product_table_exported)
+        self.worker.status.connect(lambda msg: self.statusbar.showMessage(msg))
+        self.worker.permission_error.connect(self.on_permission_error)
+        self.worker.finished_success.connect(self.on_finished_success)
+        self.thread.start()
+        print("thread started")
+
+
+class Worker(QObject):
+    # class attributes
+    finished = Signal()
+    progress = Signal(int)
+    error = Signal(str)
+    restart = Signal()
+    product_table_exported = Signal(str)
+    permission_error = Signal()
+    status = Signal()
+    finished_success = Signal()
+
+    # * parameter signifies no positional arg is allowed after *, only keyword args
+    def __init__(self, *, infilename, template_filename, page_start, page_end, output_path, product_table_path):
+        super(Worker, self).__init__()
+        self.infilename = infilename
+        self.template_filename = template_filename
+        self.page_start = page_start
+        self.page_end = page_end
+        self.output_path = output_path
+        self.product_table_path = product_table_path
+
+        self.coro = self.run_generator()
+
+    def run(self):
+        try:
+            next(self.coro)
+        except StopIteration:
+            self.finished.emit()
+            return
+
+    def run_generator(self):
+        start_time = time.time()
+        print(f"run generator entered")
+
+        price_list = PdfDoc(
+            in_file_name=self.infilename,
+            template_json=self.template_filename,
+            page_start=self.page_start,
+            n_pages=self.page_end - self.page_start + 1
+        )
+
+        print("doc obj created")
+
+        try:
+            price_list.create_pages(lambda p: self.progress.emit(p))
+            print("pages created")
+        except Exception:
+            err_msg = f"Could not complete task!\nPossible errors:\n{os.path.basename(self.template_filename)} doesn't contain required tables\nor\n{os.path.basename(self.infilename)} layout not supported"
+            print(err_msg)
+            self.error.emit(err_msg)
+            self.restart.emit()
+            return
+
+
+        price_list.create_product_tables()
+        price_list.construct_cumulative_dict()
+        price_list.patch_cumulative_dictionary()
+        timestamp = datetime.today().strftime('%Y-%m-%d-%H-%M-%S')
+
+        product_table_path = f'{self.output_path}/product_table.csv'
+        product_table_export_success = False
+        while not product_table_export_success:
+            try:
+                product_table_export_success = price_list.export_cumulative_dict(product_table_path)
+            except PermissionError:
+                # signal ui of error in product table access
+                err_msg = f"{os.path.basename(self.product_table_path)}\nAccess denied. Close applications that might use it and press Continue"
+                self.error.emit(err_msg)
+                self.status.emit(err_msg)
+                self.permission_error.emit()
+                yield
+
+        end_time = time.time()
+        hours, rem = divmod(end_time - start_time, 3600)
+        minutes, seconds = divmod(rem, 60)
+        time_msg = f"Time elapsed: {minutes:.0f} min {seconds:.0f} sec\n"
+        self.product_table_exported.emit(time_msg)
+        yield
+
+        # continuing
+        target_uom_export_success = False
+        while not target_uom_export_success:
+            try:
+                target_uom_export_success = create_target_and_uom(
+                    f'{self.output_path}/product_table.csv',
+                    f'{self.output_path}/target.csv',
+                    f'{self.output_path}/uom.csv'
+                )
+            except PermissionError:
+                err_msg = f"target.csv or uom.csv\nAccess denied. Close applications that might use it and press Continue"
+                self.error.emit(err_msg)
+                self.status.emit(err_msg)
+                self.permission_error.emit()
+                yield
+        self.finished_success.emit()
         return
 
 
@@ -393,5 +495,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-# TODO fix progress bar not showing progress
-# TODO make it multithreaded
+
