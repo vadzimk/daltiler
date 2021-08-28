@@ -7,6 +7,8 @@ Because the catalog is extensive it makes sense to use `daltiler` each time the 
 
 `daltiler` uses tabula-java as an engine for reading the pdf file one page at a time in several modes. It uses tabula-python as an interface and python as the language for the application.
 
+[Runing Daltiler app!](Daltiler_ui.gif "Running Daltiler app")
+
 ## Requirements
 - Java 8
 - Windows 10, 64-bit
