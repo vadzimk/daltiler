@@ -1,4 +1,7 @@
 import json
+import multiprocessing
+import queue
+import threading
 
 import pandas
 
@@ -16,16 +19,65 @@ class PdfDoc:
         self.__pages = []
         self.__list_of_all_product_dicts = []
         self.__all_pages_product_dict = {}  # dictionary that will hold the items of all product tables
+        self.__callback = lambda p: None
+        self.pdf_page_queue = queue.Queue()
 
-    def create_pages(self, callback=lambda p: None):
+    def pdf_pages_manager(self):
+        """ exclusively creates pages on PdfDoc obj i.e.
+        appends to __pages"""
+        print("pages_manager started")
+        counter = 0
+        while True:
+            page = self.pdf_page_queue.get()
+            self.__pages.append(page)
+            counter += 1
+            print(f"counter {counter}")
+            self.__callback(counter)
+            self.pdf_page_queue.task_done()
+
+    def create_pages_in_threads(self, callback):
+        self.__callback = callback
+        pages_manager_t = threading.Thread(target=self.pdf_pages_manager, daemon=True)
+        pages_manager_t.start()
+        del pages_manager_t
+
+        THREAD_N = max(multiprocessing.cpu_count()-1, 1)
+        workers = []
+        next_batch_page_n = self.__page_start
+
+        while next_batch_page_n < self.__page_start + self.__n_pages:
+            for i in range(min(THREAD_N, self.__page_start + self.__n_pages - next_batch_page_n)):
+                page_num = next_batch_page_n + i
+                coordinates = self.extract_page_data_from_json_data(self.__jsondata, page_num)
+
+                t = threading.Thread(target=self.__worker, args=(page_num, coordinates))
+                workers.append(t)
+                t.start()
+
+            for t in workers:
+                t.join()
+            next_batch_page_n += THREAD_N
+        self.pdf_page_queue.join()
+
+    def __worker(self, page_num, coordinates):
+        worker_page = PdfPage(
+            infilename=self.__in_file_name,
+            pagenumber=page_num,
+            coordinates=coordinates
+        )
+        self.pdf_page_queue.put(worker_page)
+
+    def create_pages(self, callback):
+        """ create pages in one thread """
         self.__pages = [PdfPage(
-            self.__in_file_name,
-            i,
+            infilename=self.__in_file_name,
+            pagenumber=i,
             coordinates=self.extract_page_data_from_json_data(json_data=self.__jsondata, pagenumber=i),
-            callback=callback
+            callback = callback
         ) for i in range(self.__page_start, self.__page_start + self.__n_pages)]
 
     def create_product_tables(self):
+        self.__pages.sort(key=lambda i: i.pagenumber)
         color_dicts = []
         for page in reversed(self.__pages):
             color_dicts.append(page.color_dict)
@@ -43,9 +95,10 @@ class PdfDoc:
             for item in self.__list_of_all_product_dicts:
                 self.__all_pages_product_dict[key] += item[key]
 
-        #patch cumulative dictionary where
+        # patch cumulative dictionary where
         # _group ends with  "CONT'D" replace to "" remove any " - "
         # if empty _item_size	_vendor_code, copy from the previous index
+
     def patch_cumulative_dictionary(self):
         index = None
         for i, group in enumerate(self.__all_pages_product_dict['_group']):
@@ -53,9 +106,9 @@ class PdfDoc:
                 item_sizes = self.__all_pages_product_dict['_item_size']
                 vendor_codes = self.__all_pages_product_dict['_vendor_code']
                 if not item_sizes[i]:
-                    item_sizes[i] = item_sizes[i-1]
+                    item_sizes[i] = item_sizes[i - 1]
                 if not vendor_codes[i]:
-                    vendor_codes[i]=vendor_codes[i-1]
+                    vendor_codes[i] = vendor_codes[i - 1]
                 self.__all_pages_product_dict['_group'][i] = group.replace("CONT'D", "").rstrip(' -')
 
         # print(f"cumulative dict: {self.__list_of_all_product_dicts}")
@@ -73,7 +126,6 @@ class PdfDoc:
              which is relevant to the pagenumber only"""
         page_data = [data for data in json_data if data["page"] == pagenumber]
         return page_data
-
 
     @staticmethod
     def read_json_data(json_file_name):

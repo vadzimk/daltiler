@@ -1,6 +1,7 @@
 import json
 import math
 import time
+import traceback
 
 from PySide2.QtCore import Slot, QRegExp, QObject, Signal, QThread
 from PySide2.QtGui import QPalette, QColor, QRegExpValidator
@@ -38,7 +39,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.errors = []
         self.thread = None
         self.worker = None
-        # self.initialize_fields()
+        self.initialize_fields()
+        self.start_time = None
 
     # for debugging
     def initialize_fields(self):
@@ -270,10 +272,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_7.setEnabled(value)
 
     def set_page_progress(self, p):
-        # QApplication.processEvents()
-        progress = int(math.ceil((p - self.page_start + 1) * 100 / (self.page_end - self.page_start + 1)))
+        print(f"pages processed {p}")
+        progress = int(math.ceil(p * 100 / (self.page_end - self.page_start + 1)))
         self.progressBar.setValue(min(progress, 99))
-        self.statusbar.showMessage(f"Read page: {p}")
+        duration = time.time() - self.start_time
+        estimated_sec_remaining = 100 * duration / progress - duration
+        minutes, seconds = divmod(estimated_sec_remaining, 60)
+        self.statusbar.showMessage(f"N pages read: {p}. Remaining time: {int(minutes)}min {int(seconds)}sec.")
         print('progress', self.progressBar.value())
 
     def show_info_dialog(self, text):
@@ -326,6 +331,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.statusbar.showMessage("Done")
         self.enable_line_edits_and_selects(False)
 
+    def set_start_time(self, start_time):
+        self.start_time = start_time
+
     @Slot(None)
     def on_restart(self):
         try:
@@ -368,10 +376,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.thread = QThread()
         self.worker = Worker(**args)
-        print("thread created")
+        print("Background Worker thread created")
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.thread.finished.connect(self.thread.deleteLater)
+        self.worker.started.connect(self.set_start_time)
         self.worker.finished.connect(self.worker.deleteLater)
         self.worker.finished.connect(self.thread.quit)
         self.worker.progress.connect(self.set_page_progress)
@@ -382,11 +391,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker.permission_error.connect(self.on_permission_error)
         self.worker.finished_success.connect(self.on_finished_success)
         self.thread.start()
-        print("thread started")
+        print("Background Worker thread started")
 
 
 class Worker(QObject):
     # class attributes
+    started = Signal(int)
     finished = Signal()
     progress = Signal(int)
     error = Signal(str)
@@ -408,6 +418,7 @@ class Worker(QObject):
 
         self.coro = self.run_generator()
 
+
     def run(self):
         try:
             next(self.coro)
@@ -417,24 +428,28 @@ class Worker(QObject):
 
     def run_generator(self):
         start_time = time.time()
+        self.started.emit(start_time)
         print(f"run generator entered")
 
         price_list = PdfDoc(
             in_file_name=self.infilename,
             template_json=self.template_filename,
             page_start=self.page_start,
-            n_pages=self.page_end - self.page_start + 1
+            n_pages=self.page_end - self.page_start + 1,
         )
 
         print("doc obj created")
 
         try:
-            price_list.create_pages(lambda p: self.progress.emit(p))
+            # for single-threaded call:
+            # price_list.create_pages(callback=lambda p: self.progress.emit(p-self.page_start+1))
+            price_list.create_pages_in_threads(callback=lambda p: self.progress.emit(p))
             print("pages created")
         except Exception:
             err_msg = f"Could not complete task!\nPossible errors:\n{os.path.basename(self.template_filename)} doesn't contain required tables\nor\n{os.path.basename(self.infilename)} layout not supported"
             print(err_msg)
             self.error.emit(err_msg)
+            traceback.print_exc()
             self.restart.emit()
             return
 

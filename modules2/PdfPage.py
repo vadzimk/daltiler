@@ -11,7 +11,7 @@ import pprint
 class PdfPage:
     """ when page is created it reads the pdf doc at that page in necessary modes """
 
-    def __init__(self, infilename, pagenumber, coordinates, callback=lambda p: None):
+    def __init__(self, infilename, pagenumber, coordinates, callback=lambda p:None):
         self.__infilename = infilename
         self.__pagenumber = pagenumber
         self.__coordinates = coordinates
@@ -32,6 +32,10 @@ class PdfPage:
         # print(self.__color_dict)
         self.__product_tables = []
         callback(self.__pagenumber)
+
+    @property
+    def pagenumber(self):
+        return self.__pagenumber
 
     def make_product_tables(self, color_dict_list):
         """ for each DataTable create product table using color dict
@@ -173,15 +177,15 @@ class PdfPage:
             tables.append(cur_table)  # append the last table
             return tables
 
-        print("fixed_rows")
-        for r in fixed_rows:
-            print(r)
-        print("template_rows")
-        for r_set in template_rows:
-            for r in r_set:
-                print(r)
-            print('-' * 10)
-        print('\n')
+        # print("fixed_rows")
+        # for r in fixed_rows:
+        #     print(r)
+        # print("template_rows")
+        # for r_set in template_rows:
+        #     for r in r_set:
+        #         print(r)
+        #     print('-' * 10)
+        # print('\n')
 
         fixed_result = [t for t in break_into_separate_selections(fixed_rows) if
                         not (is_color_header_in_fixed(t[0]) or is_color_header_in_fixed(t[1]))]
@@ -194,24 +198,24 @@ class PdfPage:
                     t.insert(1, dummy_row)
                 template_result.append(t)
 
-        # debug
-        print("\nfixed_result:")
-        for i, t in enumerate(fixed_result):
-            print(f'data table {i}')
-            for r2 in t:
-                print(r2)
-
-        print("\ntemplate_result:")
-        for i, t in enumerate(template_result):
-            print(f'data table {i}')
-            for r2 in t:
-                print(r2)
+        # # debug
+        # print("\nfixed_result:")
+        # for i, t in enumerate(fixed_result):
+        #     print(f'data table {i}')
+        #     for r2 in t:
+        #         print(r2)
+        #
+        # print("\ntemplate_result:")
+        # for i, t in enumerate(template_result):
+        #     print(f'data table {i}')
+        #     for r2 in t:
+        #         print(r2)
 
         result = []
         for index, _ in enumerate(fixed_result):
-            print("length of template_result", len(template_result))
+            # print("length of template_result", len(template_result))
             if len(template_result) > index:
-                print("index", index)
+                # print("index", index)
                 t_row = template_result[index]
             else:
                 t_row = [''] * 4
@@ -298,9 +302,9 @@ class PdfPage:
                 pass
                 # print(f"No selections on page {pagenumber}")
 
-        # debugging
-        print("tabula.read_pdf with template")
-        self.print_df_list(df_list)
+        # # debugging
+        # print("tabula.read_pdf with template")
+        # self.print_df_list(df_list)
 
         result = [self.df_to_rows(df, header=False) for df in df_list]
 
