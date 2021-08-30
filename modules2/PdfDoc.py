@@ -67,7 +67,7 @@ class PdfDoc:
         )
         self.pdf_page_queue.put(worker_page)
 
-    def create_pages(self, callback):
+    def create_pages(self, callback=lambda p: None):
         """ create pages in one thread """
         self.__pages = [PdfPage(
             infilename=self.__in_file_name,

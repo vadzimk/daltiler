@@ -3,8 +3,6 @@ import pickle
 import sys
 import time
 
-import tabula
-
 from modules2.PdfDoc import PdfDoc
 from modules2 import PROJ_CONST as PR
 from modules2.func import *
