@@ -78,10 +78,10 @@ class Target:
 
             target_config_pack = self.packaging_unit_configued(
                 config_row_n)  # looks up in csv file the type of product and determines the sales unit
-            units_of_measure_formatted = self._units_of_measure_to_sales_packaging_unit.get(
+            units_of_measure_formatted_plural = self._units_of_measure_to_sales_packaging_unit.get(
                 units_of_measure, units_of_measure)
-            sales_packaging_unit = target_config_pack if target_config_pack else units_of_measure_formatted
-
+            sales_packaging_unit_plural = target_config_pack if target_config_pack else units_of_measure_formatted_plural
+            sales_packaging_unit = self._singulars.get(sales_packaging_unit_plural, sales_packaging_unit_plural)
             self._dictionary["Sales Packaging Unit"].append(sales_packaging_unit)
 
             units_per_carton = source_d['_units_per_carton'][i]
@@ -132,9 +132,9 @@ class Target:
             # "stockunits",
             # "purchaseunits",
             # "saleunits",
-            self._dictionary["stockunits"].append(units_of_measure_formatted)
-            self._dictionary["purchaseunits"].append(units_of_measure_formatted)
-            self._dictionary["saleunits"].append(sales_packaging_unit)
+            self._dictionary["stockunits"].append(units_of_measure_formatted_plural)
+            self._dictionary["purchaseunits"].append(units_of_measure_formatted_plural)
+            self._dictionary["saleunits"].append(sales_packaging_unit_plural)
 
             # # Old requirements:
             # if sales_packaging_unit == "BOX":
