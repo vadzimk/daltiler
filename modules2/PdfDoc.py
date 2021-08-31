@@ -16,7 +16,7 @@ class PdfDoc:
         self.__page_start = page_start
         self.__n_pages = n_pages
         self.__jsondata = self.read_json_data(template_json)
-        self.__pages = []
+        self._pages = []
         self.__list_of_all_product_dicts = []
         self.__all_pages_product_dict = {}  # dictionary that will hold the items of all product tables
         self.__callback = lambda p: None
@@ -29,7 +29,7 @@ class PdfDoc:
         counter = 0
         while True:
             page = self.pdf_page_queue.get()
-            self.__pages.append(page)
+            self._pages.append(page)
             counter += 1
             print(f"counter {counter}")
             self.__callback(counter)
@@ -69,7 +69,7 @@ class PdfDoc:
 
     def create_pages(self, callback=lambda p: None):
         """ create pages in one thread """
-        self.__pages = [PdfPage(
+        self._pages = [PdfPage(
             infilename=self.__in_file_name,
             pagenumber=i,
             coordinates=self.extract_page_data_from_json_data(json_data=self.__jsondata, pagenumber=i),
@@ -77,15 +77,15 @@ class PdfDoc:
         ) for i in range(self.__page_start, self.__page_start + self.__n_pages)]
 
     def create_product_tables(self):
-        self.__pages.sort(key=lambda i: i.pagenumber)
+        self._pages.sort(key=lambda i: i.pagenumber)
         color_dicts = []
-        for page in reversed(self.__pages):
+        for page in reversed(self._pages):
             color_dicts.append(page.color_dict)
             page.make_product_tables(color_dicts)
             page.build_tables()
 
     def construct_cumulative_dict(self):
-        for page in self.__pages:
+        for page in self._pages:
             for pt in page.product_tables:
                 self.__list_of_all_product_dicts.append(pt.products)
 

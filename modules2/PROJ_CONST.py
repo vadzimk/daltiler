@@ -1,14 +1,14 @@
-DIR_PROJECT = './project_daltiler/'
-DIR_TABULATED_CSV = './project_daltiler/tabulated_csv/'
-DIR_PRODUCT_TABLES = './project_daltiler/dataframes/'
-DIR_TREATED_ROWS = './project_daltiler/treatedrows/'
-DIR_XPDF = './project_daltiler/html/'
+import os
+from pathlib import Path
 
-DOC_PRODUCT_TABLE = './project_daltiler/product_table.csv'
-DOC_TARGET = './project_daltiler/target.csv'
-DOC_UOM = './project_daltiler/uom.csv'
+base_path = Path(os.path.abspath(__file__)).parents[1].absolute()
 
-TARGET_CONFIG = './TARGET_CONFIG.csv'
+DIR_PROJECT = base_path.joinpath('project_daltiler')
 
-OUTPUTXLS = 'output.xlsx'
+DOC_PRODUCT_TABLE = base_path.joinpath('project_daltiler','product_table.csv')
+DOC_TARGET = base_path.joinpath('project_daltiler','target.csv')
+DOC_UOM = base_path.joinpath('project_daltiler','uom.csv')
+
+TARGET_CONFIG = base_path.joinpath('TARGET_CONFIG.csv')
+
 

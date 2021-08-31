@@ -2,10 +2,8 @@ import os
 from pathlib import Path
 import shutil
 
-import subprocess
-from html.parser import HTMLParser
 
-from modules import PROJ_CONST as PR
+from modules2 import PROJ_CONST as PR
 import pandas
 import csv
 

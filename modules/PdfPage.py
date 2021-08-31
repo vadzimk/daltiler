@@ -16,7 +16,6 @@ class PdfPage:
         self.infilename = infilename
         self.pagenumber = pagenumber
         print("page:", self.pagenumber)  # print page number while creating
-        self.midfilename = '{}tabulated_{}.csv'.format(PR.DIR_TABULATED_CSV, self.pagenumber)
         self.list_of_csv_rows = None  # contain list of rows from the csv file obtained from tabula
 
         # self.html_page_data_set = set()

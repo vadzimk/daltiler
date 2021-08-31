@@ -20,16 +20,14 @@ class Uom:
                 self._dictionary["Item(Type Name)"].append(target_obj._dictionary["externalid"][i])
                 self._dictionary["Internal ID *Update Only"].append("")
 
-                u_singular = ""
-                if self._singulars[item]:
-                    u_singular = self._singulars[item]
+
+                u_singular = self._singulars.get(item, "")
                 self._dictionary["Unit Name (Name)"].append(u_singular)
 
                 self._dictionary["Plural Name"].append(item)
 
-                abbr = ""
-                if target_obj._packaging_abbreviation[u_singular]:
-                    abbr = target_obj._packaging_abbreviation[u_singular]
+
+                abbr = target_obj._packaging_abbreviation.get(u_singular,"")
                 self._dictionary["Abbreviation"].append(abbr)
 
                 pl_abbr = ""

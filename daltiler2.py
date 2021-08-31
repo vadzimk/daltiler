@@ -1,25 +1,24 @@
-import os
-import pickle
 import sys
 import time
 
 from modules2.PdfDoc import PdfDoc
-from modules2 import PROJ_CONST as PR
 from modules2.func import *
 from modules2.tf import create_target_and_uom
 
 # pl_cache_name = 'cache.pickle'
 
-#
 # def export_pages(obj, filename):
 #     """ :param dfs: a dictionary {pagenumber: [df1, df2 ...]}"""
 #     try:
-#         print(f'Writing file "{filename}"...', end='')
+#         print("obj len", len(obj))
+#         print(f'Writing file "{filename}"...')
 #         with open(filename, 'wb') as out_file_pickled:  # OPEN file TO WRITE BYTES
 #             pickle.dump(obj, out_file_pickled)
 #             print('done!')
-#     except:
+#     except Exception:
 #         print('error from pickle_dict')
+#         traceback.print_exc()
+#
 #
 #
 # def import_pages(filename):
@@ -29,6 +28,7 @@ from modules2.tf import create_target_and_uom
 #             return pickle.load(fh)
 #     except Exception:
 #         print(f"error opening pickled {filename}")
+#         traceback.print_exc()
 
 
 def main():
@@ -97,11 +97,13 @@ def main():
     # # ==============================================
     # if rescan:
     #     price_list.create_pages()
-    #     export_pages(price_list, 'cache.pickle')
+    #     export_pages(price_list._pages, 'cache.pickle')
     # else:
-    #     price_list = import_pages(pl_cache_name)
+    #     price_list.__pages = import_pages(pl_cache_name)
+    #     print("imported len", len(price_list.__pages))
     # print('=======create tables now============')
     # try:
+
     print(f"Reading pages:")
     price_list.create_pages()
     print(f"For each page: creating product tables...")

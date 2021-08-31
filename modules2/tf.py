@@ -10,6 +10,7 @@ def create_target_and_uom(
         target_path=PR.DOC_TARGET,
         uom_path=PR.DOC_UOM
 ):
+    os.path.dirname(os.path.abspath(__file__))
     source_dict = read_to_dict(product_table_path)
     target_dict = {k: [] for k in TEMPLATE.HEADER}  # to contain target file of the template
 

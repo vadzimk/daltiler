@@ -2,7 +2,8 @@ import json
 import math
 import time
 import traceback
-
+import fbs
+from PySide2 import QtGui
 from PySide2.QtCore import Slot, QRegExp, QObject, Signal, QThread
 from PySide2.QtGui import QPalette, QColor, QRegExpValidator
 from PySide2.QtWidgets import *
@@ -10,6 +11,7 @@ from UI_MainWindow import Ui_MainWindow
 from modules2.PdfDoc import PdfDoc
 from modules2.func import *
 from modules2.tf import create_target_and_uom
+from modules2 import PROJ_CONST as PR
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -47,7 +49,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.lineEdit.setText("D:/Tileshop/daltiler/n.pdf")
         self.lineEdit_4.setText("D:/Tileshop/daltiler/n.tabula-template.json")
         self.lineEdit_2.setText("5")
-        self.lineEdit_3.setText("5")
+        self.lineEdit_3.setText("191")
         self.lineEdit_9.setText("D:/Tileshop/daltiler/project_daltiler")
 
     def connect_signals_and_slots(self):
@@ -498,6 +500,8 @@ class Worker(QObject):
 
 def main():
     app = QApplication([])
+    iconPath = PR.base_path.joinpath('Dv2.ico')
+    app.setWindowIcon(QtGui.QIcon(str(iconPath)))
     window = MainWindow()
     window.show()
     app.exec_()
