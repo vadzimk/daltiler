@@ -1,7 +1,5 @@
 # daltiler
-`daltiler` is a desktop application using Qt for Python, packaged with pyInstaller.
-
-It is intended to automate data entry into the ERP system from pdf catalogue of one specific vendor.
+`daltiler` is a desktop application to automate data entry into the ERP system from pdf catalogue of one specific vendor.
  
 Because the pdf catalog is also the price-list `daltiler` is used each time the pdf catalog is updated.
 
