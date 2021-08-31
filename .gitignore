@@ -25,3 +25,4 @@ xpdf/
 project/*
 pdfinfo/
 freeze
+*tabula-template.json
