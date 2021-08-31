@@ -33,8 +33,8 @@ Before running `daltiler2`, export tabula-template.json of the pdf catalog with 
 
 
 ## Input
-pdf file containing pages with tables from Daltile catalog
-tabula-template.json file
+- pdf file containing pages with tables from Daltile catalog
+- tabula-template.json file
 
 ## Output
 product_table.csv - *structured data extracted from all fields of tables*   
