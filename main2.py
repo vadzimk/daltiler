@@ -273,14 +273,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.pushButton_7.setEnabled(value)
 
     def set_page_progress(self, p):
-        print(f"pages processed {p}")
+        # print(f"pages processed {p}")
         progress = int(math.ceil(p * 100 / (self.page_end - self.page_start + 1)))
         self.progressBar.setValue(min(progress, 99))
         duration = time.time() - self.start_time
         estimated_sec_remaining = 100 * duration / progress - duration
         minutes, seconds = divmod(estimated_sec_remaining, 60)
         self.statusbar.showMessage(f"N pages read: {p}. Remaining time: {int(minutes)}min {int(seconds)}sec.")
-        print('progress', self.progressBar.value())
+        # print('progress', self.progressBar.value())
 
     def show_info_dialog(self, text):
         QMessageBox.information(self, "Info", text, QMessageBox.StandardButton.Ok)
@@ -357,7 +357,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         if not ready:
             return
         # Prepare ui to run
-        print("handle run entered")
+        # print("handle run entered")
         self.progressBar.setValue(0)
         self.progressBar.setVisible(True)
         self.pushButton_4.setEnabled(False)
@@ -377,7 +377,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
         self.thread = QThread()
         self.worker = Worker(**args)
-        print("Background Worker thread created")
+        # print("Background Worker thread created")
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.thread.finished.connect(self.thread.deleteLater)
@@ -392,7 +392,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker.permission_error.connect(self.on_permission_error)
         self.worker.finished_success.connect(self.on_finished_success)
         self.thread.start()
-        print("Background Worker thread started")
+        # print("Background Worker thread started")
 
 
 class Worker(QObject):
@@ -430,7 +430,7 @@ class Worker(QObject):
     def run_generator(self):
         start_time = time.time()
         self.started.emit(start_time)
-        print(f"run generator entered")
+        # print(f"run generator entered")
 
         price_list = PdfDoc(
             in_file_name=self.infilename,
@@ -439,13 +439,13 @@ class Worker(QObject):
             n_pages=self.page_end - self.page_start + 1,
         )
 
-        print("doc obj created")
+        # print("doc obj created")
 
         try:
             # for single-threaded call:
             # price_list.create_pages(callback=lambda p: self.progress.emit(p-self.page_start+1))
             price_list.create_pages_in_threads(callback=lambda p: self.progress.emit(p))
-            print("pages created")
+            # print("pages created")
         except Exception:
             err_msg = f"Could not complete task!\nPossible errors:\n{os.path.basename(self.template_filename)} doesn't contain required tables\nor\n{os.path.basename(self.infilename)} layout not supported"
             print(err_msg)

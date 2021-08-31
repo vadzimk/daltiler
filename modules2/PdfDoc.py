@@ -25,13 +25,13 @@ class PdfDoc:
     def pdf_pages_manager(self):
         """ exclusively creates pages on PdfDoc obj i.e.
         appends to __pages"""
-        print("pages_manager started")
+        # print("pages_manager started")
         counter = 0
         while True:
             page = self.pdf_page_queue.get()
             self._pages.append(page)
             counter += 1
-            print(f"counter {counter}")
+            # print(f"counter {counter}")
             self.__callback(counter)
             self.pdf_page_queue.task_done()
 
