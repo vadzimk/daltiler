@@ -3,6 +3,8 @@ from modules2 import TEMPLATE
 from modules2.func import *
 from modules2.Target import Target
 from modules2.Uom import Uom
+from modules2 import PROJ_CONST as PR
+
 
 
 def create_target_and_uom(
@@ -10,7 +12,6 @@ def create_target_and_uom(
         target_path=PR.DOC_TARGET,
         uom_path=PR.DOC_UOM
 ):
-    os.path.dirname(os.path.abspath(__file__))
     source_dict = read_to_dict(product_table_path)
     target_dict = {k: [] for k in TEMPLATE.HEADER}  # to contain target file of the template
 

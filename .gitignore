@@ -24,3 +24,4 @@ tests.py
 xpdf/
 project/*
 pdfinfo/
+freeze

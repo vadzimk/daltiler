@@ -12,6 +12,8 @@ Because the pdf catalog is also the price-list `daltiler` is used each time the 
 - Qt threads to separate GUI from background process
 - python threads and atomic queue to speed up background i/o bound processing
 
+
+![Dailtiler ui final](running.png "Daltiler ui final")
 ![Runing Daltiler app](Daltiler_ui.gif "Running Daltiler app")
 
 ## Requirements

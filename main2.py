@@ -2,7 +2,6 @@ import json
 import math
 import time
 import traceback
-import fbs
 from PySide2 import QtGui
 from PySide2.QtCore import Slot, QRegExp, QObject, Signal, QThread
 from PySide2.QtGui import QPalette, QColor, QRegExpValidator
@@ -500,8 +499,7 @@ class Worker(QObject):
 
 def main():
     app = QApplication([])
-    iconPath = PR.base_path.joinpath('Dv2.ico')
-    app.setWindowIcon(QtGui.QIcon(str(iconPath)))
+    app.setWindowIcon(QtGui.QIcon('Dv2.ico'))
     window = MainWindow()
     window.show()
     app.exec_()
@@ -509,3 +507,6 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# Opens java cli in subprocess workaround
+# https://github.com/pyinstaller/pyinstaller/wiki/Recipe-subprocess

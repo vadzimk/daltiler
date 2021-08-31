@@ -5,34 +5,9 @@ from modules2.PdfDoc import PdfDoc
 from modules2.func import *
 from modules2.tf import create_target_and_uom
 
-# pl_cache_name = 'cache.pickle'
-
-# def export_pages(obj, filename):
-#     """ :param dfs: a dictionary {pagenumber: [df1, df2 ...]}"""
-#     try:
-#         print("obj len", len(obj))
-#         print(f'Writing file "{filename}"...')
-#         with open(filename, 'wb') as out_file_pickled:  # OPEN file TO WRITE BYTES
-#             pickle.dump(obj, out_file_pickled)
-#             print('done!')
-#     except Exception:
-#         print('error from pickle_dict')
-#         traceback.print_exc()
-#
-#
-#
-# def import_pages(filename):
-#     try:
-#         print(f"opening pickled {filename}")
-#         with open(filename, 'rb') as fh:
-#             return pickle.load(fh)
-#     except Exception:
-#         print(f"error opening pickled {filename}")
-#         traceback.print_exc()
 
 
 def main():
-
     DOC_SELECTIONS_COORDINATES = find_tabula_template_json_filename()
     if not DOC_SELECTIONS_COORDINATES:
         input(f"Press Enter to close this window")
@@ -74,9 +49,6 @@ def main():
     print(f"Working on {infilename}\nPlease wait....")
     start_time = time.time()
 
-    # price_list = PdfDoc('3.pdf', 1, 3)
-    # price_list = PdfDoc('Daltile2.pdf', 1, 1)
-    # price_list = PdfDoc('Daltile3.pdf', 1, 187)
 
     price_list = PdfDoc(
         infilename,
@@ -85,25 +57,8 @@ def main():
         n_pages=n_pages_to_process
     )
 
-    # # ============= option to use cache ============
-    # rescan = True
-    # if os.path.exists(pl_cache_name):
-    #     print(f"Found {pl_cache_name}")
-    #     rescan = input(f"Rescan pages? (y/n): ")
-    #     if rescan.lower()=='y':
-    #         rescan = True
-    #     else:
-    #         rescan = False
-    # # ==============================================
-    # if rescan:
-    #     price_list.create_pages()
-    #     export_pages(price_list._pages, 'cache.pickle')
-    # else:
-    #     price_list.__pages = import_pages(pl_cache_name)
-    #     print("imported len", len(price_list.__pages))
-    # print('=======create tables now============')
-    # try:
 
+    # try:
     print(f"Reading pages:")
     price_list.create_pages()
     print(f"For each page: creating product tables...")
@@ -139,7 +94,7 @@ def main():
     minutes, seconds = divmod(rem, 60)
     print(f"Task finished.\n"
           f"Time elapsed: {minutes:.0f} min {seconds:.0f} sec\n"
-          f"See:\n{PR.DIR_PROJECT}product_table.csv\n"
+          f"See:\n{PR.DIR_PROJECT}/product_table.csv\n"
           f"{PR.DOC_TARGET}\n"
           f"{PR.DOC_UOM}")
 
