@@ -15,7 +15,7 @@ class PdfPage:
         self.__infilename = infilename
         self.__pagenumber = pagenumber
         self.__coordinates = coordinates
-        print("page: ", self.__pagenumber)
+        # print("page: ", self.__pagenumber)
         # datatable is a list of rows
 
         self.__csv_rows = self.read_fixed_columns_tabula()

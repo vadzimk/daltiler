@@ -7,7 +7,7 @@ from modules2 import PROJ_CONST as PR
 import pandas
 import csv
 
-from PyPDF2 import PdfFileReader
+from PyPDF2 import pdf
 
 
 def cleanup():
@@ -32,7 +32,7 @@ def create_project():
 
 def get_pdf_page_count(path):
     with open(path, 'rb') as fl:
-        reader = PdfFileReader(fl)
+        reader = pdf.PdfFileReader(fl)
         return reader.getNumPages()
 
 

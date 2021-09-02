@@ -1,5 +1,6 @@
 import json
 import math
+import multiprocessing
 import time
 import traceback
 from PySide2 import QtGui
@@ -62,8 +63,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.errors = []
         self.thread = None
         self.worker = None
-        self.initialize_fields()
         self.start_time = None
+        # self.initialize_fields()
 
     def show_help_text(self, text):
         msg_box = QMessageBox()
@@ -474,11 +475,12 @@ class Worker(QObject):
 
         try:
             # for single-threaded call:
-            # price_list.create_pages(callback=lambda p: self.progress.emit(p-self.page_start+1))
-            price_list.create_pages_in_threads(callback=lambda p: self.progress.emit(p), n_threads=1)
-            # print("pages created")
-        except Exception:
-            err_msg = f"Could not complete task!\nPossible errors:\n{os.path.basename(self.template_filename)} doesn't contain required tables\nor\n{os.path.basename(self.infilename)} layout not supported"
+            price_list.create_pages(callback=lambda p: self.progress.emit(p-self.page_start+1))
+            # for multi-threaded call:
+            # price_list.create_pages_in_threads(callback=lambda p: self.progress.emit(p), n_threads=1)
+
+        except Exception as e:
+            err_msg = f"Could not complete task!\nPossible errors:\n{os.path.basename(self.template_filename)} doesn't contain required tables\nor\n{os.path.basename(self.infilename)} layout not supported\n{e}"
             print(err_msg)
             self.error.emit(err_msg)
             traceback.print_exc()
@@ -529,6 +531,7 @@ class Worker(QObject):
 
 
 def main():
+    multiprocessing.freeze_support()
     app = QApplication([])
     app.setWindowIcon(QtGui.QIcon('Dv2.ico'))
     window = MainWindow()
@@ -541,5 +544,6 @@ if __name__ == '__main__':
 
 # Opens java cli in subprocess workaround
 # https://github.com/pyinstaller/pyinstaller/wiki/Recipe-subprocess
+# https://github.com/pyinstaller/pyinstaller/wiki/Recipe-Multiprocessing
 
 # pyside2-uic mainwindow.ui -o UI_MainWindow.py

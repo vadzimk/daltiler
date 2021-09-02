@@ -60,7 +60,7 @@ def main():
 
     # try:
     print(f"Reading pages:")
-    price_list.create_pages()
+    price_list.create_pages(lambda p: print(f"page: {p}"))
     print(f"For each page: creating product tables...")
     price_list.create_product_tables()
     print(f"Aggregating data from all tables...")

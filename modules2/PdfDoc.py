@@ -73,7 +73,7 @@ class PdfDoc:
             infilename=self.__in_file_name,
             pagenumber=i,
             coordinates=self.extract_page_data_from_json_data(json_data=self.__jsondata, pagenumber=i),
-            callback = callback
+            callback=callback
         ) for i in range(self.__page_start, self.__page_start + self.__n_pages)]
 
     def create_product_tables(self):
