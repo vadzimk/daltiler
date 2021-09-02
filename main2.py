@@ -3,14 +3,13 @@ import math
 import time
 import traceback
 from PySide2 import QtGui
-from PySide2.QtCore import Slot, QRegExp, QObject, Signal, QThread
+from PySide2.QtCore import Slot, QRegExp, QObject, Signal, QThread, Qt
 from PySide2.QtGui import QPalette, QColor, QRegExpValidator
 from PySide2.QtWidgets import *
 from UI_MainWindow import Ui_MainWindow
 from modules2.PdfDoc import PdfDoc
 from modules2.func import *
 from modules2.tf import create_target_and_uom
-from modules2 import PROJ_CONST as PR
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -19,6 +18,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setupUi(self)
         self.setFixedSize(679, 430)
         self.setWindowTitle("Daltiler")
+        self.help_action = QAction(self, text="Help")
+        self.about_action = QAction(self, text="About")
+        help_text = "Before running `Daltiler`\nexport tabula-template.json of the pdf catalog with the help of Tabula for Windows.\nhttps://tabula.technology\nUse autodetect tables to create tabula-template.json."
+        about_text = "`Daltiler` automates data entry into the ERP system from pdf catalogue of one specific vendor.\nInput:\n- pdf file containing pages with tables from Daltile catalog\n- tabula-template.json file\nOutput\n- product_table.csv - structured data extracted from all fields of tables\n- target.csv - client's template for upload in ERP\n- uom.csv - another client's template containing units conversion for upload in ERP"
+        self.help_action.triggered.connect(lambda: self.show_help_text(help_text))
+        self.about_action.triggered.connect(lambda: self.show_help_text(about_text))
+        self.menubar.addAction(self.help_action)
+        self.menubar.addAction(self.about_action)
 
         self.progressBar.setVisible(False)
 
@@ -42,6 +49,12 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.worker = None
         self.initialize_fields()
         self.start_time = None
+
+    def show_help_text(self, text):
+        msg_box = QMessageBox()
+        msg_box.setText(text)
+        msg_box.setWindowFlags(self.windowFlags() | Qt.Popup)
+        msg_box.exec_()
 
     # for debugging
     def initialize_fields(self):
@@ -195,7 +208,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                     page_map[item["page"]] = True
             isvalid = False not in page_map.values()
             if not isvalid:
-                err_msg = f"{os.path.basename(self.template_filename)}\ncontains no page range: ({self.page_start}, {self.page_end})"
+                # print("page_map", page_map)
+                missing_pages_in_json = [str(k) for k, v in page_map.items() if v == False]
+                missing_pages_in_json_str = ', '.join(missing_pages_in_json)
+                err_msg = f"{os.path.basename(self.template_filename)}\nmissing selections from pages: {missing_pages_in_json_str}"
                 self.errors.append(err_msg)
 
         return isvalid
@@ -419,7 +435,6 @@ class Worker(QObject):
 
         self.coro = self.run_generator()
 
-
     def run(self):
         try:
             next(self.coro)
@@ -444,7 +459,7 @@ class Worker(QObject):
         try:
             # for single-threaded call:
             # price_list.create_pages(callback=lambda p: self.progress.emit(p-self.page_start+1))
-            price_list.create_pages_in_threads(callback=lambda p: self.progress.emit(p))
+            price_list.create_pages_in_threads(callback=lambda p: self.progress.emit(p), n_threads=1)
             # print("pages created")
         except Exception:
             err_msg = f"Could not complete task!\nPossible errors:\n{os.path.basename(self.template_filename)} doesn't contain required tables\nor\n{os.path.basename(self.infilename)} layout not supported"
@@ -510,3 +525,5 @@ if __name__ == '__main__':
 
 # Opens java cli in subprocess workaround
 # https://github.com/pyinstaller/pyinstaller/wiki/Recipe-subprocess
+
+# pyside2-uic mainwindow.ui -o UI_MainWindow.py

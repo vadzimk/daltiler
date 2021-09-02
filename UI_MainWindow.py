@@ -22,6 +22,10 @@ class Ui_MainWindow(object):
         font.setFamily(u"MS Shell Dlg 2")
         font.setPointSize(10)
         MainWindow.setFont(font)
+        self.actionUsage = QAction(MainWindow)
+        self.actionUsage.setObjectName(u"actionUsage")
+        self.actionAbout = QAction(MainWindow)
+        self.actionAbout.setObjectName(u"actionAbout")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         sizePolicy = QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
@@ -237,6 +241,8 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"MainWindow", None))
+        self.actionUsage.setText(QCoreApplication.translate("MainWindow", u"Usage", None))
+        self.actionAbout.setText(QCoreApplication.translate("MainWindow", u"About", None))
         self.label_9.setText(QCoreApplication.translate("MainWindow", u"1. Catalog type", None))
         self.comboBox.setItemText(0, QCoreApplication.translate("MainWindow", u"Daltile", None))
 

@@ -35,13 +35,13 @@ class PdfDoc:
             self.__callback(counter)
             self.pdf_page_queue.task_done()
 
-    def create_pages_in_threads(self, callback):
+    def create_pages_in_threads(self, callback, n_threads=max(multiprocessing.cpu_count()-1, 1)):
         self.__callback = callback
         pages_manager_t = threading.Thread(target=self.pdf_pages_manager, daemon=True)
         pages_manager_t.start()
         del pages_manager_t
 
-        THREAD_N = max(multiprocessing.cpu_count()-1, 1)
+        THREAD_N = min(n_threads, max(multiprocessing.cpu_count()-1, 1))
         workers = []
         next_batch_page_n = self.__page_start
 

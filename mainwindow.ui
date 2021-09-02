@@ -386,6 +386,16 @@
     <enum>Qt::DefaultContextMenu</enum>
    </property>
   </widget>
+  <action name="actionUsage">
+   <property name="text">
+    <string>Usage</string>
+   </property>
+  </action>
+  <action name="actionAbout">
+   <property name="text">
+    <string>About</string>
+   </property>
+  </action>
  </widget>
  <resources/>
  <connections/>
