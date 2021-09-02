@@ -20,8 +20,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setWindowTitle("Daltiler")
         self.help_action = QAction(self, text="Help")
         self.about_action = QAction(self, text="About")
-        help_text = "Before running `Daltiler`\nexport tabula-template.json of the pdf catalog with the help of Tabula for Windows.\nhttps://tabula.technology\nUse autodetect tables to create tabula-template.json."
-        about_text = "`Daltiler` automates data entry into the ERP system from pdf catalogue of one specific vendor.\nInput:\n- pdf file containing pages with tables from Daltile catalog\n- tabula-template.json file\nOutput\n- product_table.csv - structured data extracted from all fields of tables\n- target.csv - client's template for upload in ERP\n- uom.csv - another client's template containing units conversion for upload in ERP"
+        help_text = "<h4>Before running `Daltiler`</h4>" \
+                    "<ul>" \
+                    "<li>export tabula-template.json of the pdf catalog with the help of <a href='https://tabula.technology'>Tabula for Windows</a></li>" \
+                    "<li>Use autodetect tables to create tabula-template.json</li>" \
+                    "</ul>"
+        about_text = "<h4>`Daltiler` automates data entry into the ERP system from pdf catalogue of one specific vendor</h4><h5>Input:</h5>" \
+                     "<ul>" \
+                     "<li>pdf file containing pages with tables from Daltile catalog</li>" \
+                     "<li>tabula-template.json file</li>" \
+                     "</ul>" \
+                     "<h5>Output</h5>" \
+                     "<ul>" \
+                     "<li>product_table.csv - structured data extracted from all fields of tables</li>" \
+                     "<li>target.csv - client's template for upload in ERP</li>" \
+                     "<li>uom.csv - another client's template containing units conversion for upload in ERP</li>" \
+                     "</ul>"
         self.help_action.triggered.connect(lambda: self.show_help_text(help_text))
         self.about_action.triggered.connect(lambda: self.show_help_text(about_text))
         self.menubar.addAction(self.help_action)
@@ -52,6 +66,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def show_help_text(self, text):
         msg_box = QMessageBox()
+        msg_box.setTextFormat(Qt.RichText)
         msg_box.setText(text)
         msg_box.setWindowFlags(self.windowFlags() | Qt.Popup)
         msg_box.exec_()
