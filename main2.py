@@ -35,7 +35,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                      "<li>product_table.csv - structured data extracted from all fields of tables</li>" \
                      "<li>target.csv - client's template for upload in ERP</li>" \
                      "<li>uom.csv - another client's template containing units conversion for upload in ERP</li>" \
-                     "</ul>"
+                     "</ul>" \
+                     "<a href='mailto:vadzimk@hotmail.com'>Email developer</a>"
         self.help_action.triggered.connect(lambda: self.show_help_text(help_text))
         self.about_action.triggered.connect(lambda: self.show_help_text(about_text))
         self.menubar.addAction(self.help_action)
