@@ -1,6 +1,7 @@
 # daltiler
-`daltiler` is a desktop application to automate product data entry from pdf catalogue into ERP for one particular vendor.
- 
+
+## Overview
+`daltiler` is a desktop application to automate product data entry from pdf catalogue into ERP for one particular vendor.  
 Because the pdf catalog is also a price-list, `daltiler` is used each time pdf catalog is updated.
 
 `daltiler` uses 
