@@ -1,16 +1,16 @@
 # daltiler
 
 ## Overview
-`daltiler` is a desktop application to automate product data entry from pdf catalogue into ERP for one particular vendor.  
-Because the pdf catalog is also a price-list, `daltiler` is used each time pdf catalog is updated.
+**daltiler** is a desktop GUI application to automate product data entry from pdf catalogue into ERP for one particular vendor.  
+Because the PDF catalog is also a price-list, **daltiler** is used each time PDF catalog is updated.
 
-`daltiler` uses 
-- tabula-java as an engine for text extraction from pdf
+### **daltiler** project uses 
+- tabula-java as an engine for text extraction from PDF
 - tabula-python as an interface to python language
-- python and pandas for data transformation into client required shape
-- Qt for python as gui library
+- Python and Pandas for data transformation into client required shape
+- Qt for python as GUI library
 - Qt threads to separate GUI from background process
-- python threads and atomic queue to speed up background i/o bound processing
+- Python threads and atomic queue to speed up background I/O bound processing
 
 
 ![Dailtiler ui final](running.png "Daltiler ui final")
@@ -29,7 +29,7 @@ Tabula installation link:
 https://tabula.technology/
 
 ## Usage
-Before running `daltiler2`, export tabula-template.json of the pdf catalog with the help of Tabula for Windows. Use autodetect tables to create tabula-template.json. Save template in the same directory with the program.
+Before running **daltiler2**, export tabula-template.json of the pdf catalog with the help of Tabula for Windows. Use autodetect tables to create tabula-template.json. Save template in the same directory with the program.
 
 
 ## Input
